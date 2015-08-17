@@ -11,7 +11,7 @@
 study <- function(mem, nFeatures, LR, FR = NULL) {
 
   mxn <- prod(dim(mem))
-  strengths <- init_mem + rbinom(mxn, nFeatures - mem, LR)
+  strengths <- mem + rbinom(mxn, nFeatures - mem, LR)
   if (!is.null(FR)) {
     strengths <- strengths - rbinom(mxn, strengths, FR)
   }

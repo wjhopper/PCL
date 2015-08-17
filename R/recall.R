@@ -1,3 +1,17 @@
+#' PCL Cued Recall Simulation
+#'
+#' @param mem
+#' @param thresh
+#' @param space
+#' @param Tmin
+#' @param Tmax
+#' @param Time
+#' @param lambda
+#'
+#' @return Logical Matrix representing recall success/failure of each list item
+#'  for each simulation
+#' @export
+#'
 cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                        Time=NULL,lambda=NULL) {
 
@@ -16,6 +30,22 @@ cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
   return(recalled)
 }
 
+
+#' PCL Free Recall Simulation
+#'
+#' @param mem
+#' @param thresh
+#' @param space
+#' @param Tmin
+#' @param Tmax
+#' @param Time
+#' @param lambda
+#'
+#' @return If time parameters are used, list of 3 matrices representing
+#'  accuracy, reaction time, and serial order. If time parameters are not used, list of 2
+#'  matrices representing accuracy and serial order.
+#' @export
+#'
 freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                        Time=NULL,lambda=NULL) {
   if (is.null(time)) {
