@@ -1,4 +1,4 @@
-cuedRecall <- function(mem=NULL,thresh=NULL,space=NULL,Tmin=NULL,Tmax=NULL,
+cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                        Time=NULL,lambda=NULL) {
 
   if (is.null(Time)) {
@@ -16,12 +16,13 @@ cuedRecall <- function(mem=NULL,thresh=NULL,space=NULL,Tmin=NULL,Tmax=NULL,
   return(recalled)
 }
 
-freeRecall <- function(mem=NULL,thresh=NULL,space=NULL,Tmin=NULL,Tmax=NULL,
+freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                        Time=NULL,lambda=NULL) {
   if (is.null(time)) {
     recalled <- mem >= thresh
     serialOrder <- t(apply(mem,1, order, decreasing = TRUE))
     return(list(Acc=recalled, order=serialOrder))
+
   } else {
     RT <- serialOrder <- matrix(NA, nrow = nrow(mem), ncol = ncol(mem))
     recalled <- matrix(FALSE, nrow = nrow(RT), ncol = ncol(RT))

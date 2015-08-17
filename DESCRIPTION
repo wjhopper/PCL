@@ -1,0 +1,9 @@
+Package: PCL
+Title: Pattern Completetion Learning model
+Version: 0.0.0.9000
+Authors@R: person("Will", "Hopper", email = "whopper@psych.umass.edu", role = c("aut", "cre"))
+Description: Implements the core model logic of pattern completion learning, as applied to the testing effect 
+Depends: R (>= 3.2.1)
+License: CC0
+LazyData: true
+VignetteBuilder: knitr
