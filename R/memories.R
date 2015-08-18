@@ -38,10 +38,10 @@ test <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
   init_thresh  <- thresh
   mxn <- prod(dim(mem))
   nCor = sum(acc)
-  mem[acc] <- init_mem[acc] + rbinom(nCor,p['nFeat']-init_mem[acc], LR)
+  mem[acc] <- init_mem[acc] + rbinom(nCor,nFeatures - init_mem[acc], LR)
   thresh[acc] <- init_thresh[acc] - rbinom(nCor,init_thresh[acc], TR)
   if (!is.null(FR)) {
     strengths <- mem - rbinom(mxn, mem, FR)
   }
-  return(mem = strengths,thresh = thresh)
+  return(list(mem = strengths,thresh = thresh))
 }
