@@ -1,7 +1,8 @@
 #' @export
 paramBounds <- function(p, lower= 0, upper = 1) {
-  if (any(p[names(p) %in% c("ER","LR","TR","F1","theta","space")] > upper, na.rm = TRUE) ||
-      any(p[names(p) %in% c("ER","LR","TR","F1","lambda","theta","space")] < lower, na.rm = TRUE)) {
+  if (any(p[names(p) %in% c("ER","LR","TR","F1","F2","FR","theta","space")] > upper, na.rm = TRUE) ||
+      any(p[names(p) %in% c("ER","LR","TR","F1","F2","FR","Tmin","lambda","theta","space")] < lower, 
+          na.rm = TRUE)) {
     return(FALSE)
   } else {
     return(TRUE)
