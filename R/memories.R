@@ -34,14 +34,15 @@ study <- function(mem, nFeatures, LR, FR = NULL) {
 #' @export
 test <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 
-  init_mem <- mem #copy strengths and thresholds from practice test
-  init_thresh  <- thresh
+  strengths <- mem #copy strengths and thresholds from practice test
+  theta  <- thresh
   mxn <- prod(dim(mem))
   nCor = sum(acc)
-  mem[acc] <- init_mem[acc] + rbinom(nCor,nFeatures - init_mem[acc], LR)
-  thresh[acc] <- init_thresh[acc] - rbinom(nCor,init_thresh[acc], TR)
+  strengths[acc] <- mem[acc] + rbinom(nCor,nFeatures - mem[acc], LR)
+  theta[acc] <- thresh[acc] - rbinom(nCor, thresh[acc], TR)
   if (!is.null(FR)) {
-    strengths <- mem - rbinom(mxn, mem, FR)
+    strengths <- strengths - rbinom(mxn, strengths, FR)
   }
-  return(list(mem = strengths,thresh = thresh))
+
+  return(list(mem = strengths,thresh = theta))
 }
