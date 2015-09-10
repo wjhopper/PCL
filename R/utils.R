@@ -1,8 +1,17 @@
 #' @export
-paramBounds <- function(p, lower= 0, upper = 1) {
-  if (any(p[names(p) %in% c("ER","LR","TR","F1","F2","FR","theta","space")] > upper, na.rm = TRUE) ||
-      any(p[names(p) %in% c("ER","LR","TR","F1","F2","FR","Tmin","lambda","theta","space","alpha")] < lower,
-          na.rm = TRUE)) {
+paramBounds <- function(p) {
+
+  probability_params <- c("ER","LR","TR","F1","F2","FR","space","theta")
+  transform_params <- "alpha"
+  strict_positive_params <- c("Tmin","Tmax","lambda")
+
+  prob_check <- any(p[names(p) %in% probability_params] < 0, na.rm = TRUE) ||
+                any(p[names(p) %in% probability_params] > 1, na.rm = TRUE)
+  transform_check <- any(p[names(p) %in% probability_params] <= 0, na.rm = TRUE) ||
+                     any(p[names(p) %in% probability_params] >= 1, na.rm = TRUE)
+  strict_pos_check <- any(p[names(p) %in% strict_positive_params] <= 0, na.rm = TRUE)
+
+  if (any(prob_check, transform_check, strict_pos_check)) {
     return(FALSE)
   } else {
     return(TRUE)
