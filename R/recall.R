@@ -19,15 +19,19 @@ cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
     recalled <- mem > thresh
   } else {
     RT=Tmin + (Tmax-Tmin)*exp(-lambda*abs(mem-thresh))
-    recalled <- (RT < Time) & (mem > thresh)
+    ouput <- list(recalled = (RT < Time) &  (mem >= thresh),
+                     recoverable = mem >= thresh)
   }
 
-  if (!is.null(space)) {
-    spaced <- as.logical(rbinom(recalled,1,space))
-    recalled[recalled & spaced] <- FALSE
+  if (!is.null(space) && is.list(output)) {
+    spaced <- as.logical(rbinom(output$recalled,1,space))
+    output$recalled[output$recalled & spaced] <- FALSE
+  } else {
+    spaced <- as.logical(rbinom(output,1,space))
+    output[output & spaced] <- FALSE
   }
 
-  return(recalled)
+  return(output)
 }
 
 
@@ -56,20 +60,23 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
   } else {
     RT <- serialOrder <- matrix(NA, nrow = nrow(mem), ncol = ncol(mem))
     recalled <- matrix(FALSE, nrow = nrow(RT), ncol = ncol(RT))
+    recoverable <- recalled
     for (i in 1:nrow(RT)) {
       ord <- order(mem[i,],decreasing=TRUE)
       reverseOrd <- order(ord)
       CRT <- cumsum(Tmin + (Tmax-Tmin)*exp(-lambda*abs(mem[i,]-thresh[i,]))[ord])
       acc <- CRT < Time & (mem[i,ord]  >= thresh[i,ord])
+      rec <- mem[i,ord]  >= thresh[i,ord]
       if (any(acc)) {
         RT[i,ord[acc]] <- c(CRT[acc][1],diff(CRT[acc]))
       }
       recalled[i,] <- acc[reverseOrd]
+      recoverable <- rec[reverseOrd]
       serialOrder[i,] <- ord
     }
   }
 
-  return(list(Acc=recalled,RTrounded=RT,order=serialOrder))
+  return(list(Acc=recalled,RTrounded=RT,order=serialOrder,recoverable = recoverable))
 
   # tests
   # max(mem[i,])==mem[i,ord[1]] & min(mem[i,])==mem[i,ord[15]]
