@@ -7,8 +7,8 @@ paramBounds <- function(p) {
 
   prob_check <- any(p[names(p) %in% probability_params] < 0, na.rm = TRUE) ||
                 any(p[names(p) %in% probability_params] > 1, na.rm = TRUE)
-  transform_check <- any(p[names(p) %in% probability_params] <= 0, na.rm = TRUE) ||
-                     any(p[names(p) %in% probability_params] >= 1, na.rm = TRUE)
+  transform_check <- any(p[names(p) %in% transform_params] <= 0, na.rm = TRUE) ||
+                     any(p[names(p) %in% transform_params] >= 1, na.rm = TRUE)
   strict_pos_check <- any(p[names(p) %in% strict_positive_params] <= 0, na.rm = TRUE)
 
   if (any(prob_check, transform_check, strict_pos_check)) {
