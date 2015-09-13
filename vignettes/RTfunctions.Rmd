@@ -1,0 +1,42 @@
+---
+title: "Reaction Time Functions"
+author: "Will Hopper"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RT Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup,echo=FALSE,message=FALSE,warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+
+```
+
+## Negative Exponential
+
+3 parameter function: 
+
+  - **Max RT** (y intercept)
+  - **Min RT** (x asymptote)
+  - **lambda** (Rate of decrease)
+  
+```{r neg-exp, echo=FALSE, fig.height = 7, fig.width= 7}
+Tmin <- .5
+Tmax <- 90
+lambdas <- c(3,2,1,.75,.5,.25,.1)
+y <- sapply(lambdas, function(l) Tmin + (Tmax-Tmin)*exp(-l*abs(0:10))) %>%
+  melt(value.name="RT") %>%
+  rename(x=Var1, lambda=Var2) %>%
+  mutate(lambda = lambdas[lambda])
+lambda_plot <- ggplot(y, aes(x=x,y=RT, color = factor(lambda))) +
+  geom_line(size=.75) +
+  scale_y_continuous(breaks=seq(0,90,by=10)) + 
+  scale_color_discrete("Lambda") + 
+  scale_x_discrete("Distance to Threshold", breaks=0:10) + 
+  ggtitle("Predicted RT for Different Lambdas")
+print(lambda_plot)
+```
