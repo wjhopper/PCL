@@ -71,7 +71,7 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
         RT[i,ord[acc]] <- c(CRT[acc][1],diff(CRT[acc]))
       }
       recalled[i,] <- acc[reverseOrd]
-      recoverable <- rec[reverseOrd]
+      recoverable[i,] <- rec[reverseOrd]
       serialOrder[i,] <- ord
     }
   }
