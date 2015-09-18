@@ -11,9 +11,9 @@
 study <- function(mem, nFeatures, LR, FR = NULL) {
 
   mxn <- prod(dim(mem))
-  strengths <- mem + rbinom(mxn, nFeatures - mem, LR)
+  strengths <- mem + rbinom(mxn, as.integer(nFeatures - mem), LR)
   if (!is.null(FR)) {
-    strengths <- strengths - rbinom(mxn, strengths, FR)
+    strengths <- strengths - rbinom(mxn, as.integer(strengths), FR)
   }
 
   return(strengths)
@@ -38,10 +38,10 @@ test <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
   theta  <- thresh
   mxn <- prod(dim(mem))
   nCor = sum(acc)
-  strengths[acc] <- mem[acc] + rbinom(nCor,nFeatures - mem[acc], LR)
-  theta[acc] <- thresh[acc] - rbinom(nCor, thresh[acc], TR)
+  strengths[acc] <- mem[acc] + rbinom(nCor,as.integer(nFeatures - mem[acc]), LR)
+  theta[acc] <- thresh[acc] - rbinom(nCor, as.integer(thresh[acc]), TR)
   if (!is.null(FR)) {
-    strengths <- strengths - rbinom(mxn, strengths, FR)
+    strengths <- strengths - rbinom(mxn, as.integer(strengths), FR)
   }
 
   return(list(mem = strengths,thresh = theta))

@@ -3,7 +3,7 @@ paramBounds <- function(p) {
 
   probability_params <- c("ER","LR","TR","F1","F2","FR","space","theta")
   transform_params <- "alpha"
-  strict_positive_params <- c("Tmin","Tmax","lambda")
+  strict_positive_params <- c("Tmin","Tmax","lambda","Ta","Tb","Fa","Fb")
 
   prob_check <- any(p[names(p) %in% probability_params] < 0, na.rm = TRUE) ||
                 any(p[names(p) %in% probability_params] > 1, na.rm = TRUE)
