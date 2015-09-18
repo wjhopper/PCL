@@ -62,10 +62,10 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
 
     # Preallocate return structures
     RT <- matrix(NA, nrow = nrow(mem), ncol = ncol(mem))
+    RTcor <- matrix(NA, nrow = nrow(mem), ncol = ncol(mem))
     serialOrder <- matrix(NA, nrow = nrow(mem), ncol = ncol(mem))
     recalled <- matrix(FALSE, nrow = nrow(mem), ncol = ncol(mem))
     recoverable <- matrix(FALSE, nrow =nrow(mem), ncol = ncol(mem))
-
     for (i in 1:nrow(RT)) {
 
       # Find search order, and reverse indices
@@ -74,25 +74,23 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
 
       # Calculate RT and accuracy
       rt <- Tmin + (Tmax-Tmin)*exp(-lambda*abs(mem[i,]-thresh[i,]))
-      rec <- mem[i,]  >= thresh[i,][ord]
-      acc <- cumsum(rt[ord]) < Time & rec
+      crt <- cumsum(rt[ord])
+      rec <- (mem[i,]  >= thresh[i,])[ord]
+      acc <- crt < Time & rec
+      rt_cor <- c(crt[acc][1], diff(crt[acc]))
+      rt_cor <- rt_cor[!is.na(rt_cor)]
 
       # Fill in the output structures
       # In simulation order, not search order!!!!
       RT[i,] <- rt
+      RTcor[i,acc[reverseOrd]] <- rt_cor
       recalled[i,] <- acc[reverseOrd]
       recoverable[i,] <- rec[reverseOrd]
       serialOrder[i,] <- ord
     } # close for
   } # close if switch
 
-  return(list(Acc=recalled,RTrounded=RT,
+  return(list(Acc=recalled,RT=RT, RTcor = RTcor,
               order=serialOrder,recoverable = recoverable))
-
-  # tests
-  # max(mem[i,])==mem[i,ord[1]] & min(mem[i,])==mem[i,ord[15]]
-  # mem[i,ord][reverseOrd] == mem[i,]
-  # all((mem[i,] >= thresh[i,])==recalled[i,])
-  # all(!is.na(RT[i,]) ==recalled[i,] & is.na(RT[i,]) == !recalled[i,])
 
 } # Close freeRecall
