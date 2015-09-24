@@ -2,11 +2,28 @@
 % Please edit documentation in R/memories.R
 \name{study}
 \alias{study}
-\title{study}
+\alias{study_beta}
+\alias{study_binomial}
+\title{Study}
 \usage{
-study(mem, nFeatures, LR, FR = NULL)
+study(...)
+
+study_beta(mem, nFeatures, LR, FR = NULL)
+
+study_binomial(mem, nFeatures, LR, FR = NULL)
 }
 \arguments{
+\item{...}{Arugments passed to approriate functions based on type-checking. See details.}
+
+\item{mem}{Matrix of memory strengths.}
+
+\item{nFeatures}{Number of features the memory for each item has}
+
+\item{LR}{Learning Rate. Gives the probability of learning a new features
+through practice}
+
+\item{FR}{Forgetting Rate. Gives the probability of forgetting a feature}
+
 \item{mem}{Matrix of memory strengths.}
 
 \item{nFeatures}{Number of features the memory for each item has}
@@ -18,8 +35,24 @@ through practice}
 }
 \value{
 Matrix of memory strengths updated after restudying
+
+Matrix of memory strengths updated after restudying
 }
 \description{
-study
+Effects of studying on un-encoded features
+
+study beta
+
+study binomial
 }
+\details{
+test will attempt to type-check the mem matrix and call the
+appropriate function (study_beta for doubles,study_binomial for integers).
+}
+\section{Functions}{
+\itemize{
+\item \code{study_beta}: study_beta is for continous data
+
+\item \code{study_binomial}: study_binomial is for discrete features
+}}
 

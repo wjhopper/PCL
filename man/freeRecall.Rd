@@ -23,9 +23,10 @@ freeRecall(mem, thresh, space = NULL, Tmin = NULL, Tmax = NULL,
 \item{lambda}{}
 }
 \value{
-If time parameters are used, list of 3 matrices representing
- accuracy, reaction time, and serial order. If time parameters are not used, list of 2
- matrices representing accuracy and serial order.
+If time parameters are used, list of 4 matrices representing
+ accuracy, recoverability, reaction time, and serial order.
+ If time parameters are not used, returns list of 2 matrices representing
+ accuracy and serial order.
 }
 \description{
 PCL Free Recall Simulation
