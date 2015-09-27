@@ -14,10 +14,17 @@ lambda = .5
 time = 90
 lr = .15
 tr = .1
+result <- freeRecall(mem, thresh, Tmin=tmin,Tmax=tmax,lambda= lambda,Time=time)
 
 test_that("RT is a function of threshold distance", {
-  result <- freeRecall(mem, thresh, Tmin=tmin,Tmax=tmax,lambda= lambda,Time=time)
   predRT <- tmin + (tmax-tmin)*exp(-lambda*abs(mem-thresh))
   expect_equal(predRT, result$RT)
+})
+
+test_that("RTcor and Accuracy are consistent with each other", {
+  expect_false(any(result$Acc[is.na(result$RTcor)]==TRUE))
+  expect_true(all(result$Acc[!is.na(result$RTcor)]==TRUE))
+  expect_false(anyNA(result$RTcor[result$Acc]))
+  expect_true(all(is.na(result$RTcor[!result$Acc])))
 })
 
