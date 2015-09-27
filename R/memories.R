@@ -61,7 +61,7 @@ study_beta <- function(mem, nFeatures, LR, FR = NULL) {
   beta_pars <- betaABfromMeanSD(binomM/toGo, sqrt(binomVAR/(toGo^2)))
   mem <- mem + (rbeta(mxn, beta_pars$a, beta_pars$b) * toGo)
 
-  if (!is.null(FR)) {
+  if (!is.null(FR) && FR != 0) {
     mem[mem < 1] <- 1
     binomVAR <-  mem*FR*(1-FR)
     binomM <-  mem*FR
@@ -109,7 +109,7 @@ test_beta <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
   thresh[acc] <- thresh[acc] - (rbeta(nCor, beta_pars$a[acc], beta_pars$b[acc])
                                * thresh[acc])
 
-  if (!is.null(FR)) {
+  if (!is.null(FR) && FR != 0) {
     mem[mem < 1] <- 1
     binomVAR <-  mem*FR*(1-FR)
     binomM <-  mem*FR
@@ -136,7 +136,7 @@ study_binomial <- function(mem, nFeatures, LR, FR = NULL) {
 
   mxn <- prod(dim(mem))
   mem <- mem + rbinom(mxn, nFeatures - mem, LR)
-  if (!is.null(FR)) {
+  if (!is.null(FR) && FR != 0) {
     mem <- mem - rbinom(mxn, mem, FR)
   }
 
@@ -161,7 +161,7 @@ test_binomial <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
   nCor = sum(acc)
   mem[acc] <- mem[acc] + rbinom(nCor, nFeatures - mem[acc], LR)
   thresh[acc] <- thresh[acc] - rbinom(nCor, thresh[acc], TR)
-  if (!is.null(FR)) {
+  if (!is.null(FR) && FR != 0) {
     mem <- mem - rbinom(mxn, mem, FR)
   }
 
