@@ -59,17 +59,17 @@ study_beta <- function(mem, nFeatures, LR, FR = NULL) {
   binomVAR <- toGo*LR*(1-LR)
   binomM <- toGo*LR
   beta_pars <- betaABfromMeanSD(binomM/toGo, sqrt(binomVAR/(toGo^2)))
-  strengths <- mem + (rbeta(mxn, beta_pars$a, beta_pars$b) * toGo)
+  mem <- mem + (rbeta(mxn, beta_pars$a, beta_pars$b) * toGo)
 
   if (!is.null(FR)) {
-    strengths <- ceiling(strengths)
-    binomVAR <-  strengths*FR*(1-FR)
-    binomM <-  strengths*FR
-    beta_pars <- betaABfromMeanSD(binomM/strengths, sqrt(binomVAR/(strengths^2)))
-    strengths <- strengths - (rbeta(mxn, beta_pars$a, beta_pars$b) * strengths)
+    mem[mem < 1] <- 1
+    binomVAR <-  mem*FR*(1-FR)
+    binomM <-  mem*FR
+    beta_pars <- betaABfromMeanSD(binomM/mem, sqrt(binomVAR/(mem^2)))
+    mem <- mem - (rbeta(mxn, beta_pars$a, beta_pars$b) * mem)
   }
 
-  return(strengths)
+  return(mem)
 }
 
 #' @describeIn test \code{test_beta} is designed to be used with a matrix of
@@ -88,36 +88,36 @@ study_beta <- function(mem, nFeatures, LR, FR = NULL) {
 #' @export
 test_beta <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 
-  strengths <- mem #copy encoded features. Strengths will be updated and returned, not mem
-  theta  <- thresh #copy current thresholds. theta will be updated and returned, not thresh
+#   strengths <- mem #copy encoded features. Strengths will be updated and returned, not mem
+#   theta  <- thresh #copy current thresholds. theta will be updated and returned, not thresh
   mxn <- prod(dim(mem))
   nCor = sum(acc)
 
   # memory feature updating
-  strengths[nFeatures - strengths < 1] <- nFeatures-1
-  toGo <-nFeatures - strengths
+  mem[nFeatures - mem < 1] <- nFeatures-1
+  toGo <-nFeatures - mem
   binomVAR <- toGo*LR*(1-LR)
   binomM <- toGo*LR
   beta_pars <- betaABfromMeanSD(binomM/toGo, sqrt(binomVAR/(toGo^2)))
-  strengths[acc] <- mem[acc] + (rbeta(nCor, beta_pars$a, beta_pars$b) * toGo[acc])
+  mem[acc] <- mem[acc] + (rbeta(nCor, beta_pars$a, beta_pars$b) * toGo[acc])
 
   # threshold updating
   thresh[thresh < 1] <- 1
   binomVAR <- thresh*TR*(1-TR)
   binomM <-  thresh*TR
   beta_pars <- betaABfromMeanSD(binomM/thresh, sqrt(binomVAR/thresh^2))
-  theta[acc] <- thresh[acc] - (rbeta(nCor, beta_pars$a[acc], beta_pars$b[acc])
+  thresh[acc] <- thresh[acc] - (rbeta(nCor, beta_pars$a[acc], beta_pars$b[acc])
                                * thresh[acc])
 
   if (!is.null(FR)) {
-    strengths[strengths < 1] <- 1
-    binomVAR <-  strengths*FR*(1-FR)
-    binomM <-  strengths*FR
-    beta_pars <- betaABfromMeanSD(binomM/strengths, sqrt(binomVAR/(strengths^2)))
-    strengths <- strengths - (rbeta(mxn, beta_pars$a, beta_pars$b) * strengths)
+    mem[mem < 1] <- 1
+    binomVAR <-  mem*FR*(1-FR)
+    binomM <-  mem*FR
+    beta_pars <- betaABfromMeanSD(binomM/mem, sqrt(binomVAR/(mem^2)))
+    mem <- mem - (rbeta(mxn, beta_pars$a, beta_pars$b) * mem)
   }
 
-  return(list(mem = strengths,thresh = theta))
+  return(list(mem = mem,thresh = thresh))
 }
 
 
@@ -135,12 +135,12 @@ test_beta <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 study_binomial <- function(mem, nFeatures, LR, FR = NULL) {
 
   mxn <- prod(dim(mem))
-  strengths <- mem + rbinom(mxn, nFeatures - mem, LR)
+  mem <- mem + rbinom(mxn, nFeatures - mem, LR)
   if (!is.null(FR)) {
-    strengths <- strengths - rbinom(mxn, strengths, FR)
+    mem <- mem - rbinom(mxn, mem, FR)
   }
 
-  return(strengths)
+  return(mem)
 }
 
 #' @describeIn test \code{test_binomial} is designed to be used with a matrix of
@@ -155,15 +155,15 @@ study_binomial <- function(mem, nFeatures, LR, FR = NULL) {
 #' @export
 test_binomial <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 
-  strengths <- mem #copy strengths and thresholds from practice test
-  theta  <- thresh
+#   strengths <- mem #copy strengths and thresholds from practice test
+#   theta  <- thresh
   mxn <- prod(dim(mem))
   nCor = sum(acc)
-  strengths[acc] <- mem[acc] + rbinom(nCor, nFeatures - mem[acc], LR)
-  theta[acc] <- thresh[acc] - rbinom(nCor, thresh[acc], TR)
+  mem[acc] <- mem[acc] + rbinom(nCor, nFeatures - mem[acc], LR)
+  thresh[acc] <- thresh[acc] - rbinom(nCor, thresh[acc], TR)
   if (!is.null(FR)) {
-    strengths <- strengths - rbinom(mxn, strengths, FR)
+    mem <- mem - rbinom(mxn, mem, FR)
   }
 
-  return(list(mem = strengths,thresh = theta))
+  return(list(mem = mem,thresh = thresh))
 }
