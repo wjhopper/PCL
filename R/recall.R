@@ -35,8 +35,8 @@ cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
 }
 
 
-#' PCL Free Recall Simulation
-#'
+#' @title PCL Free Recall Simulation
+#' @importFrom dplyr first
 #' @param mem
 #' @param thresh
 #' @param space
@@ -77,8 +77,7 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
       crt <- cumsum(rt[ord])
       rec <- (mem[i,]  >= thresh[i,])[ord]
       acc <- crt < Time & rec
-      rt_cor <- c(crt[acc][1], diff(crt[acc]))
-      rt_cor <- rt_cor[!is.na(rt_cor)]
+      rt_cor <- c(first(crt[acc],default = numeric(0)), diff(crt[acc]))
 
       # Fill in the output structures
       # In simulation order, not search order!!!!
