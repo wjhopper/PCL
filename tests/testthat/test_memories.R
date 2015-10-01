@@ -44,8 +44,11 @@ test_that("(Binomial) All strengths between the min and max features", {
   expect_true(all(testStrengths$thresh <= max))
   expect_true(all(testStrengths$thresh >= min))
   expect_true(all(restudyStrengths >= mem))
-  expect_true(all(testStrengths$mem >= mem))
-  expect_true(all(testStrengths$thresh <= thresh))
+  expect_true(all(testStrengths$mem[result$Acc] >= mem[result$Acc]))
+  expect_true(all(testStrengths$thresh[result$Acc] <= thresh[result$Acc]))
+  expect_identical(testStrengths$mem[!result$Acc], mem[!result$Acc])
+  expect_identical(testStrengths$thresh[!result$Acc], thresh[!result$Acc])
+
 })
 
 test_that("(Beta) All strengths between the min and max features", {
@@ -65,8 +68,10 @@ test_that("(Beta) All strengths between the min and max features", {
   # The following test will fail stochastically on item #13...
   expect_true(all(testStrengths$thresh >= min))
   expect_true(all(restudyStrengths >= mem_dec))
-  expect_true(all(testStrengths$mem >= mem_dec))
-  expect_true(all(testStrengths$thresh <= thresh_dec))
+  expect_true(all(testStrengths$mem[result$Acc] >= mem_dec[result$Acc]))
+  expect_true(all(testStrengths$thresh[result$Acc] <= thresh_dec[result$Acc]))
+  expect_identical(testStrengths$mem[!result$Acc], mem_dec[!result$Acc])
+  expect_identical(testStrengths$thresh[!result$Acc], thresh_dec[!result$Acc])
 })
 
 test_that("study() and test() can type check correctly" ,{
@@ -96,6 +101,4 @@ test_that("study() and test() can type check correctly" ,{
   expect_identical(typeof(restudyStrengths),typeof(restudyStrengths_direct))
   expect_identical(typeof(testStrengths$mem),typeof(testStrengths_direct$mem))
   expect_identical(typeof(testStrengths$thresh),typeof(testStrengths_direct$thresh))
-
-
 })
