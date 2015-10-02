@@ -69,22 +69,24 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
     for (i in 1:nrow(RT)) {
 
       # Find search order, and reverse indices
-      ord <- order(mem[i,],decreasing=TRUE)
-      reverseOrd <- order(ord)
+      ord <- order(mem[i,],decreasing=TRUE) # mem order
+      reverseOrd <- order(ord) # sim order
 
       # Calculate RT and accuracy
-      rt <- Tmin + (Tmax-Tmin)*exp(-lambda*abs(mem[i,]-thresh[i,]))
-      crt <- cumsum(rt[ord])
-      rec <- (mem[i,]  >= thresh[i,])[ord]
-      acc <- crt < Time & rec
-      rt_cor <- c(first(crt[acc],default = numeric(0)), diff(crt[acc]))
+      rt <- Tmin + (Tmax-Tmin)*exp(-lambda*abs(mem[i,]-thresh[i,])) # rt in sim order
+      crt <- cumsum(rt[ord]) # crt in mem order
+      rec <- (mem[i,]  >= thresh[i,])[ord] # rec in mem order
+      acc <- crt < Time & rec # acc in mem order
+      rt_cor <- c(first(crt[acc],default = numeric(0)), diff(crt[acc])) # rt_cor in mem order
 
       # Fill in the output structures
       # In simulation order, not search order!!!!
       RT[i,] <- rt
-      RTcor[i,acc[reverseOrd]] <- rt_cor
       recalled[i,] <- acc[reverseOrd]
       recoverable[i,] <- rec[reverseOrd]
+      rt_cor_tmp <- rep(NA,length(rt))
+      rt_cor_tmp[acc] <- rt_cor
+      RTcor[i,] <- rt_cor_tmp[reverseOrd]
       serialOrder[i,] <- ord
     } # close for
   } # close if switch
