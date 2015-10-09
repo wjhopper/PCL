@@ -2,7 +2,7 @@
 % Please edit documentation in R/recall.R
 \name{freeRecall}
 \alias{freeRecall}
-\title{PCL Free Recall Simulation}
+\title{PCR Free Recall Simulation}
 \usage{
 freeRecall(mem, thresh, space = NULL, Tmin = NULL, Tmax = NULL,
   Time = NULL, lambda = NULL)
@@ -29,6 +29,6 @@ If time parameters are used, list of 4 matrices representing
  accuracy and serial order.
 }
 \description{
-PCL Free Recall Simulation
+PCR Free Recall Simulation
 }
 

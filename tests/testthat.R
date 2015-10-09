@@ -1,4 +1,4 @@
 library(testthat)
-library(PCL)
+library(PCR)
 
-test_check("PCL")
+test_check("PCR")

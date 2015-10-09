@@ -2,7 +2,7 @@
 % Please edit documentation in R/recall.R
 \name{cuedRecall}
 \alias{cuedRecall}
-\title{PCL Cued Recall Simulation}
+\title{PCR Cued Recall Simulation}
 \usage{
 cuedRecall(mem, thresh, space = NULL, Tmin = NULL, Tmax = NULL,
   Time = NULL, lambda = NULL)
@@ -27,6 +27,6 @@ Logical Matrix representing recall success/failure of each list item
  for each simulation
 }
 \description{
-PCL Cued Recall Simulation
+PCR Cued Recall Simulation
 }
 

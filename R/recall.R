@@ -1,4 +1,4 @@
-#' PCL Cued Recall Simulation
+#' PCR Cued Recall Simulation
 #'
 #' @param mem
 #' @param thresh
@@ -35,7 +35,7 @@ cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
 }
 
 
-#' @title PCL Free Recall Simulation
+#' @title PCR Free Recall Simulation
 #' @importFrom dplyr first
 #' @param mem
 #' @param thresh
