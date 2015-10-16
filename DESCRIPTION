@@ -1,8 +1,8 @@
 Package: PCR
 Title: Primary and Convergent Retreival model
-Version: 0.1.0.9000
+Version: 0.1.0.9001
 Authors@R: person("Will", "Hopper", email = "whopper@psych.umass.edu", role = c("aut", "cre"))
-Description: Implements the core model logic of pattern completion learning, as applied to the testing effect 
+Description: Implements the core model logic of pattern completion learning, as applied to the testing effect
 Depends: R (>= 3.0.0)
 Imports: dplyr(>= 0.4.0), whoppeR (>= 0.0.0.9004)
 License: CC0

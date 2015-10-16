@@ -23,15 +23,17 @@ cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                      recoverable = mem >= thresh)
   }
 
-  if (!is.null(space) && is.list(output)) {
+  if (!is.null(space) && exists('output')) {
     spaced <- as.logical(rbinom(output$recalled,1,space))
     output$recalled[output$recalled & spaced] <- FALSE
-  } else {
-    spaced <- as.logical(rbinom(output,1,space))
-    output[output & spaced] <- FALSE
+    return(output)
+
+  } else if (!is.null(space) && !exists('output')) {
+    spaced <- as.logical(rbinom(recalled,1,space))
+    recalled[recalled & spaced] <- FALSE
+    return(recalled)
   }
 
-  return(output)
 }
 
 
