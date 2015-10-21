@@ -1,0 +1,25 @@
+---
+title: "PCR & Roediger and Karpicke 2006 data"
+author: "Will Hopper "
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup,echo=FALSE,message=FALSE,warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+```
+
+```{r rawData}
+raw <- data.frame(
+  group = c("S","T","S","T","S","T","S","T"), 
+  acc = c(NA,.7,.81,.75,.54,.68,.42,.56),
+  timepoint = c(1,1,2,2,3,3,4,4),
+  n = c(NA,30,30,30,30,30,30,30),
+  chain = c(1,2,1,2,1,2,1,2))
+```
