@@ -167,3 +167,20 @@ test_binomial <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 
   return(list(mem = mem,thresh = thresh))
 }
+
+
+forget_binomial <- function(mem, FR) {
+  mxn <- prod(dim(mem))
+  mem <- mem - rbinom(mxn, mem, FR)
+  return(mem)
+}
+
+forget_beta <- function(mem, FR) {
+  mxn <- prod(dim(mem))
+  mem[mem < 1] <- 1
+  binomVAR <-  mem*FR*(1-FR)
+  binomM <-  mem*FR
+  beta_pars <- betaABfromMeanSD(binomM/mem, sqrt(binomVAR/(mem^2)))
+  mem <- mem - (rbeta(mxn, beta_pars$a, beta_pars$b) * mem)
+  return(mem)
+}
