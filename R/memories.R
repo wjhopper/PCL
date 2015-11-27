@@ -41,7 +41,7 @@ test <- function(...) {
          Call test_beta or test_binomial directly")
   }
 }
-#' study beta
+
 #' @describeIn study study_beta is for continous data
 #' @param mem Matrix of memory strengths.
 #' @param nFeatures Number of features the memory for each item has
@@ -121,7 +121,6 @@ test_beta <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 }
 
 
-#' study binomial
 #' @describeIn study study_binomial is for discrete features
 #'
 #' @param mem Matrix of memory strengths.
@@ -169,12 +168,24 @@ test_binomial <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
 }
 
 
+#' Reduce the number of memory features activated by retrieval cues in the PCR
+#' model.
+#' @title Forget
+#' @name forget
+#' @rdname forget
+#' @param mem Matrix of memory strengths.
+#' @param FR Forgetting Rate. Gives the probability of forgetting a feature
+#'
+#' @return Matrix of memory strengths updated after forgetting
+#' @export
 forget_binomial <- function(mem, FR) {
   mxn <- prod(dim(mem))
   mem <- mem - rbinom(mxn, mem, FR)
   return(mem)
 }
 
+#' @rdname forget
+#' @export
 forget_beta <- function(mem, FR) {
   mxn <- prod(dim(mem))
   mem[mem < 1] <- 1

@@ -40,10 +40,6 @@ Matrix of memory strengths updated after restudying
 }
 \description{
 Effects of studying on un-encoded features
-
-study beta
-
-study binomial
 }
 \details{
 test will attempt to type-check the mem matrix and call the
