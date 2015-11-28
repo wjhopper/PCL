@@ -18,11 +18,14 @@ library(reshape2)
 
 ## Negative Exponential
 
-3 parameter function: 
+4 parameter function: 
 
   - **Max RT** (y intercept)
   - **Min RT** (x asymptote)
   - **lambda** (Rate of decrease)
+  - **x** (Distance to CR threshold)
+  
+$$ RT = T_{min} + (T_{max}-T_{min})(e^{-\lambda |x|}) $$
   
 ```{r neg-exp, echo=FALSE, fig.height = 7, fig.width= 7}
 Tmin <- .5
