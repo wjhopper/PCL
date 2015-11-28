@@ -264,9 +264,10 @@ model <- list(free = free,
 
 ```{r cacheConditions}
 cacheList <- lapply(list(g2,objFun,RK_PCR,routine,params$routine), digest, algo="sha256")
+opts_chunk$set(cache.extra = cacheList)
 ```
 
-```{r fit,include=FALSE, cache=TRUE, cache.extra = cacheList}
+```{r fit,include=FALSE, cache=TRUE}
 
 results <- vector(mode='list', length = 1)
 for (j in length(results)) {
@@ -323,4 +324,9 @@ ggplot(data = data, mapping = aes(x=timepoint, y=acc, colour=group,shape=type)) 
 print(xtable(as.matrix(results[[1]]), digits=3,
              caption = paste("Fixed Parameters")),
       type = "html", include.rownames=FALSE, caption.placement="top")
+```
+
+## $\chi^2$ G.O.F.
+```{r chisqTest, echo=TRUE}
+pchisq(results[[1]]$value, 1,lower.tail=FALSE)
 ```
