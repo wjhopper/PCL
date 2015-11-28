@@ -1,5 +1,5 @@
 ---
-title: "PCR & Roediger and Karpicke 2006 data"
+title: "PCR with data from Roediger and Karpicke, 2006a"
 author: "Will Hopper "
 date: "`r Sys.Date()`"
 output: 
@@ -7,15 +7,14 @@ output:
     fig_caption: yes
     toc: true
     toc_depth: 4
-    css: custom.css
 params:
   inpar: TRUE
   model: RK_PCR
-  routine: minimize
-  pars: !r c("ER","LR","Ta","TR","Tmin","Tmax","lambda")
-  fixed: !r c(FR=0,theta=.5,nFeat=100,nSim=1000,nList=15,Time=90)    
+  routine: test
+  pars: !r c("ER","LR","TR","F1","F2","Tmin")
+  fixed: !r c(Tmax=60,Ta=49.5,nFeat=100,nSim=1000,nList=30,Time=420)    
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Roediger and Karpicke 2006a Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,13 +22,14 @@ vignette: >
 ```{r setup,echo=FALSE,message=FALSE,warning=FALSE}
 library(optimx)
 library(dplyr)
+library(digest)
 library(ggplot2)
 library(reshape2)
 library(knitr)
 library(xtable)
 library(whoppeR)
 library(PCR)
-opts_chunk$set(echo = FALSE,fig.width=11,fig.height=7,cache=FALSE, 
+opts_chunk$set(echo = FALSE,fig.width=8,fig.height=6,cache=FALSE, 
                warning=F, message=FALSE, fig.align='center')
 ```
 
@@ -136,14 +136,14 @@ RK_PCR <- function(ER=.587, LR=.0936, TR =.1, F1=.133, F2=.06, Tmin=15.7, Tmax=6
   }
 
   # Reshaping the output
-  acc <-melt(acc, varnames=c("class","memOrder"),value.name = "acc")
-  RT <- melt(RT, varnames=c("class","memOrder"),value.name = "memRT")
-  RTcor <- melt(RTcor, varnames=c("class","memOrder"),value.name = "obsRT")
-  rec <- melt(rec, varnames=c("class","memOrder"),value.name = "rec")
+  acc <-melt(acc, varnames=c("group","memOrder"),value.name = "acc")
+  RT <- melt(RT, varnames=c("group","memOrder"),value.name = "memRT")
+  RTcor <- melt(RTcor, varnames=c("group","memOrder"),value.name = "obsRT")
+  rec <- melt(rec, varnames=c("group","memOrder"),value.name = "rec")
 
-  preds <- Reduce(function(x,y) left_join(x,y, by = c("class", "memOrder")),
+  preds <- Reduce(function(x,y) left_join(x,y, by = c("group", "memOrder")),
                   x=list(acc,RT,RTcor,rec)) %>%
-    mutate(class = rep(rep(c("T","S","T","S","T","S","T"),
+    mutate(group = rep(rep(c("T","S","T","S","T","S","T"),
                             each = nSim),
                         times = nList),
            sim  = rep(1:nSim, times = nrow(.)/nSim),
@@ -151,17 +151,17 @@ RK_PCR <- function(ER=.587, LR=.0936, TR =.1, F1=.133, F2=.06, Tmin=15.7, Tmax=6
                         times = nList),
            unrec = !rec & !acc,
            timeout = !acc & rec) %>%
-    group_by(class,sim,acc) %>%
+    group_by(group,sim,acc) %>%
     mutate(obsOrder = 1:n(),
            obsOrder = replace(obsOrder, acc==FALSE, NA)) %>%
     select(-rec) %>% 
     ungroup() %>% 
-    arrange(timepoint,class,memOrder,sim)
+    arrange(timepoint,group,memOrder,sim)
 
   # Check summarise switch
   if (summarised) {
     preds <- preds %>%
-      group_by(class,timepoint) %>% 
+      group_by(group,timepoint) %>% 
       summarise(pred_acc = mean(acc))
   }
   return(preds)
@@ -182,11 +182,11 @@ objFun <- function(free, fixed, model = params$model, obs  = raw,
     return(1000000)
   }
   
-  p <- c(as.list(c(free,fixed)), summarized=TRUE)
+  p <- c(as.list(c(free,fixed)), summarised=TRUE)
   preds <- do.call(model,p)
-  data <- left_join(data,preds, by = c("group","timepoint"))
-  data <- data[!is.na(data$N),]
-  err <- errorFun(data$obs, data$pred_acc, data$n)
+  data <- left_join(obs,preds, by = c("group","timepoint"))
+  data <- data[!is.na(data$n),]
+  err <- errorFun(data$acc, data$pred_acc, data$n)
   return(err)
 }
 
@@ -198,24 +198,29 @@ routine <- function(mode) {
                     method="Nelder-Mead",
                     itnmax=1000,
                     control = list(maxit=1000,kkt=FALSE,
-                                   parscale = c(1,1,200,1,1,100,1)),
-                    fcn = model$obj, # passed to erf
-                    fixed = model$fixed, # passed to erf
-                    obs = model$data[model$data$subject == j,])      # passed to erf
-      fit$subject = j
-      return(fit)  
+                                   parscale = c(1,1,1,1,1,25)),
+                    model = model$modelFcn, # passed to fun
+                    fixed = model$fixed, # passed to fun
+                    obs = model$data) # passed to fun
+      return(fit)
     }
   } else {
     fun <- function(model, fun = objFun) {
       err <- fun(free = model$free[[j]], fixed = model$fixed, 
-                 obs = model$data[model$data$subject == j,])
-      fit <- structure(data.frame(t(c(model$free[[j]], value = err,subject=j))),
+                 obs = model$data)
+      fit <- structure(data.frame(t(c(model$free[[j]], value = err))),
                        details = NULL, maximize = NULL,
                        npar = length(model$free[[j]]), follow.on=NULL,
                        class = c("optimx", "data.frame"))
       return(fit)
     }
   }
+}
+
+genBoundsList <- function(...) {
+  x <- list(...)
+  lapply(x, function(y) stopifnot(length(y)==2))
+  x <- lapply(x,function(y) list(upper=y[1],lower=y[2]))
 }
 
 paramBounds <- function(p) {
@@ -236,4 +241,86 @@ paramBounds <- function(p) {
   }
 }
 
+```
+
+
+```{r set_model}
+free <- list(c(ER=.585, LR=.102, TR =.09, F1=.137, F2=.064, Tmin=15.725))
+
+if (!all(unlist(lapply(lapply(free,names), setequal, params$pars)))) {
+  stop("Model specs in header don't match free parameters. Edit header or list of free parameters")
+}
+
+mname <- strsplit(as.character(params$model),"::")[[1]]
+fname <- paste(mname[length(mname)],
+               paste0(params$pars,collapse="_"),
+               sep="_")
+fpath <- file.path("data",paste(fname,'rds',sep='.'))
+model <- list(free = free,
+              fixed =  params$fixed,
+              modelFcn = eval(parse(text=params$model)),
+              data = raw)
+```
+
+```{r cacheConditions}
+cacheList <- lapply(list(g2,objFun,RK_PCR,routine,params$routine), digest, algo="sha256")
+```
+
+```{r fit,include=FALSE, cache=TRUE, cache.extra = cacheList}
+
+results <- vector(mode='list', length = 1)
+for (j in length(results)) {
+  message("Fitting...")
+  results[[j]] <-  try(routine(params$routine)(model))
+}
+message("Fitting Complete")
+```
+
+```{r unlist_and_extract}
+best_params <- lapply(results,function(x) {
+  x <- as.vector(coef(x))
+  names(x) <- params$pars
+  return(x) }
+  )
+preds <- lapply(best_params, function(x) {
+  args <- c(x,as.list(model$fixed), summarised = TRUE)
+  do.call(RK_PCR, args)
+})
+
+data <- left_join(raw,preds[[1]], by = c("group","timepoint")) %>%
+  filter(!is.na(n)) %>%
+  melt(id.vars = c("group","timepoint","n"), 
+       variable.name = c("type"),
+       value.name = "acc")
+```
+
+## Fixed Specs
+```{r fixedSpecs,results='asis'}
+print(xtable(t(as.matrix(model$fixed)), digits=3,
+             caption = paste("Fixed Parameters")),
+      type = "html", include.rownames=FALSE, caption.placement="top")
+```
+
+## Model Results
+```{r aggResults}
+ggplot(data = data, mapping = aes(x=timepoint, y=acc, colour=group,shape=type)) +
+    geom_point(size=6,data = filter(data,type=='acc')) +
+    geom_line(aes(group=interaction(group,type)),
+              data = filter(data,type=='acc'), size = 1) +
+    geom_point(size=6,data = filter(data,type=='pred_acc'),color='black') +
+    scale_color_discrete(name = "Conditions",
+                         labels = c("Test Practice", "Study Practice")) +
+    scale_shape_manual(name="", labels= c('Obs. Data','PCR Model'), values = c(19,4)) +
+    scale_x_discrete("Retention Interval", 
+                     labels = c("0 Mins\n(Practice Test)", "5 Mins", "2 Days","7 Days")) + 
+    scale_y_continuous("Memory Accuracy", limits=c(.4,1)) +
+    ggtitle('PCR vs. Roediger & Karpicke 2006b Data') +
+    theme_larger(2)
+```
+
+## Best Fitting Parameters
+```{r bestFit,results='asis'}
+print(xtable(as.matrix(results[[1]]), digits=3,
+             caption = paste("Fixed Parameters")),
+      type = "html", include.rownames=FALSE, caption.placement="top")
 ```
