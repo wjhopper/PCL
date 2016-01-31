@@ -58,8 +58,7 @@ RK_PCR <- function(ER=.587, LR=.0936, TR =.1, F1=.133, F2=.06, Tmin=15.7, Tmax=6
 
   binomVAR <- nFeat*ER*(1-ER)
   binomM <- nFeat*ER
-  beta_pars = betaABfromMeanSD(mean = binomM/nFeat,
-                               sd = sqrt(binomVAR/nFeat^2))
+  beta_pars = betaParams(mean = binomM/nFeat, sd = sqrt(binomVAR/nFeat^2))
   
   # Initial encoding
   mem <- matrix(rbeta(mxn, beta_pars$a, beta_pars$b),

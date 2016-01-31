@@ -58,14 +58,14 @@ study_beta <- function(mem, nFeatures, LR, FR = NULL) {
   toGo <- nFeatures - mem
   binomVAR <- toGo*LR*(1-LR)
   binomM <- toGo*LR
-  beta_pars <- betaABfromMeanSD(binomM/toGo, sqrt(binomVAR/(toGo^2)))
+  beta_pars <- betaParams(mean = binomM/toGo, sd = sqrt(binomVAR/(toGo^2)))
   mem <- mem + (rbeta(mxn, beta_pars$a, beta_pars$b) * toGo)
 
   if (!is.null(FR) && FR != 0) {
     mem[mem < 1] <- 1
     binomVAR <-  mem*FR*(1-FR)
     binomM <-  mem*FR
-    beta_pars <- betaABfromMeanSD(binomM/mem, sqrt(binomVAR/(mem^2)))
+    beta_pars <- betaParams(mean = binomM/mem, sd = sqrt(binomVAR/(mem^2)))
     mem <- mem - (rbeta(mxn, beta_pars$a, beta_pars$b) * mem)
   }
 
@@ -98,14 +98,14 @@ test_beta <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
   toGo <-nFeatures - mem
   binomVAR <- toGo*LR*(1-LR)
   binomM <- toGo*LR
-  beta_pars <- betaABfromMeanSD(binomM/toGo, sqrt(binomVAR/(toGo^2)))
+  beta_pars <- betaParams(mean = binomM/toGo, sd = sqrt(binomVAR/(toGo^2)))
   mem[acc] <- mem[acc] + (rbeta(nCor, beta_pars$a, beta_pars$b) * toGo[acc])
 
   # threshold updating
   thresh[thresh < 1] <- 1
   binomVAR <- thresh*TR*(1-TR)
   binomM <-  thresh*TR
-  beta_pars <- betaABfromMeanSD(binomM/thresh, sqrt(binomVAR/thresh^2))
+  beta_pars <- betaParams(mean = binomM/thresh, sd = sqrt(binomVAR/thresh^2))
   thresh[acc] <- thresh[acc] - (rbeta(nCor, beta_pars$a[acc], beta_pars$b[acc])
                                * thresh[acc])
 
@@ -113,7 +113,7 @@ test_beta <- function(mem, nFeatures, thresh, acc, LR, TR, FR=NULL) {
     mem[mem < 1] <- 1
     binomVAR <-  mem*FR*(1-FR)
     binomM <-  mem*FR
-    beta_pars <- betaABfromMeanSD(binomM/mem, sqrt(binomVAR/(mem^2)))
+    beta_pars <- betaParams(mean = binomM/mem, sd = sqrt(binomVAR/(mem^2)))
     mem <- mem - (rbeta(mxn, beta_pars$a, beta_pars$b) * mem)
   }
 
@@ -191,7 +191,7 @@ forget_beta <- function(mem, FR) {
   mem[mem < 1] <- 1
   binomVAR <-  mem*FR*(1-FR)
   binomM <-  mem*FR
-  beta_pars <- betaABfromMeanSD(binomM/mem, sqrt(binomVAR/(mem^2)))
+  beta_pars <- betaParams(mean = binomM/mem, sd = sqrt(binomVAR/(mem^2)))
   mem <- mem - (rbeta(mxn, beta_pars$a, beta_pars$b) * mem)
   return(mem)
 }
