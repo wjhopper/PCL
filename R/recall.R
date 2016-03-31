@@ -1,58 +1,67 @@
-#' PCR Cued Recall Simulation
+#'  PCR Cued Recall Simulation
 #'
-#' @param mem
-#' @param thresh
-#' @param space
-#' @param Tmin
-#' @param Tmax
-#' @param Time
-#' @param lambda
+#' @param x A PCR model object
+#' @param ... Additional arguments that may be passed to specific methods
 #'
-#' @return Logical Matrix representing recall success/failure of each list item
-#'  for each simulation
 #' @export
-#'
-cuedRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
-                       Time=NULL,lambda=NULL) {
+cuedRecall <- function(x, cue = 1, ...) {
+  UseMethod("cuedRecall")
+}
 
-  if (is.null(Time)) {
-    recalled <- mem > thresh
-  } else {
-    RT=Tmin + (Tmax-Tmin)*exp(-lambda*abs(mem-thresh))
-    ouput <- list(recalled = (RT < Time) &  (mem >= thresh),
-                     recoverable = mem >= thresh)
-  }
-
-  if (!is.null(space) && exists('output')) {
-    spaced <- as.logical(rbinom(output$recalled,1,space))
-    output$recalled[output$recalled & spaced] <- FALSE
-    return(output)
-
-  } else if (!is.null(space) && !exists('output')) {
-    spaced <- as.logical(rbinom(recalled,1,space))
-    recalled[recalled & spaced] <- FALSE
-    return(recalled)
-  }
+cuedRecall.timed <- function(x, cue = 1, increment = TRUE, ...) {
+  x$RT[,,cue] <- x$params$Tmin + (x$params$Tmax-x$params$Tmin) * exp(-x$params$lambda * abs(x$activations[,,cue]-x$thresholds))
+  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds) & (x$RT[,,cue] <= x$params$Tmax)
+  x <- space_out(x, cue)
+  nCor <- sum(x$recalled[,,cue])
+  x <- PRlearning(x, only_recalled = TRUE, samples = nCor)
+  x <- CRlearning(x, only_recalled = TRUE, samples = nCor)
 
 }
 
+cuedRecall.PCR <- function(x, cue = 1, increment  = TRUE, ...) {
+  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds)
+  x <- space_out(x, cue)
+  nCor <- sum(x$recalled[,,cue])
+  x <- PRlearning(x, only_recalled = TRUE, samples = nCor)
+  x <- CRlearning(x, only_recalled = TRUE, samples = nCor)
+
+}
+
+space_out <- function(x, cue = 1) {
+  if ('space' %in% names(x$params) && x$params$space >= 0) {
+    # recalled items stay the same with probability 1-space out
+    x$recalled[,,cue][x$recalled[,,cue]] <- rbinom(sum(x$recalled[,,cue]), 1, 1-x$params$space)
+  }
+  return(x)
+}
 
 #' @title PCR Free Recall Simulation
-#' @importFrom dplyr first
-#' @param mem
-#' @param thresh
-#' @param space
-#' @param Tmin
-#' @param Tmax
-#' @param Time
-#' @param lambda
+#' @param x A PCR model object
+#' @param cue A numeric value indicating which cue a test is simulated for
+#' @param ... Additional arguments passed to specific methods
 #'
-#' @return If time parameters are used, list of 4 matrices representing
-#'  accuracy, recoverability, reaction time, and serial order.
-#'  If time parameters are not used, returns list of 2 matrices representing
-#'  accuracy and serial order.
 #' @export
-#'
+freeRecall <- function(x, cue = 1, ...) {
+  UseMethod("freeRecall")
+}
+
+#' @export
+freeRecall.timed <- function(x, cue = 1, ...) {
+
+}
+
+#' @importFrom dplyr first
+#' @export
+freeRecall.PCRbinomial <- function(x, cue = 1, ...) {
+
+}
+
+#' @importFrom dplyr first
+#' @export
+freeRecall.PCRbeta <- function(x, cue = 1, ...) {
+
+}
+
 freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                        Time=NULL,lambda=NULL) {
   if (is.null(time)) {
@@ -97,3 +106,8 @@ freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
               order=serialOrder,recoverable = recoverable))
 
 } # Close freeRecall
+
+
+RT <- function(x, cue = 1, ...) {
+  x$params$Tmin + (x$params$Tmax-x$params$Tmin) * exp(-x$params$lambda * abs(x$activations[,,cue]-x$thresholds))
+}
