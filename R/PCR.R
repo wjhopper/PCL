@@ -216,7 +216,7 @@ CRlearning_factory <- function(x) {
 #' restudy <- summary(beta_t_restudied)
 summary.PCR <- function(x) {
 
-  accuracy <- apply(x$activations, 3, function(y) mean(y > x$thresholds))
+  accuracy <- apply(x$recalled, 3, mean)
   RT <- apply(x$RT, 3, median)
   x$practice[is.na(x$practice)] <- "control"
   prac <- toupper(substr(x$practice,1,1))
