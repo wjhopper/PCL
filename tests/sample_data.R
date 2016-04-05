@@ -23,3 +23,34 @@ thresh_continuous <- structure(c(0.482994295176146, 0.554661452924281, 0.9922276
                                  0.484600716134854, 0.0365049940911, 0.442111441874386, 0.497987068879674),
                                .Dim = c(3L, 5L)) * max_val
 
+beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+                            nSims = 1000, nFeatures = 100, time = 10)
+
+binom_timed <- initPCRparams(params = param_list, distribution = "binomial",nItems = 20,
+                             nSims = 1000, nFeatures = 100, time = 10)
+
+beta_untimed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+                              nSims = 1000, nFeatures = 100)
+
+binom_untimed <- initPCRparams(params = param_list, distribution = "binomial",nItems = 20,
+                               nSims = 1000, nFeatures = 100)
+
+# Initial Study
+beta_t_studied <- study(beta_timed, nCues = 2)
+binom_t_studied <- study(binom_timed, nCues = 2)
+beta_studied <- study(beta_untimed, nCues = 2)
+binom_studied <- study(binom_untimed, nCues = 2)
+
+# Restudy
+beta_t_restudied <- study(beta_t_studied, cue = 1)
+binom_t_restudied <- study(binom_t_studied, cue = 1)
+
+# Test
+beta_t_tested <- cuedRecall(beta_t_studied, cue = 1)
+binom_t_tested <- cuedRecall(binom_t_studied, cue = 1)
+
+# No Practice
+beta_t_no_prac <- forget(beta_t_studied, cue = 1)
+binom_t_no_prac <- forget(binom_t_studied, cue = 1)
+
+
