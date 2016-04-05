@@ -5,6 +5,7 @@
 #'
 #' @export
 cuedRecall <- function(x, cue = 1, ...) {
+  practice <- practice_method("test", cue)
   UseMethod("cuedRecall")
 }
 
@@ -15,6 +16,7 @@ cuedRecall.timed <- function(x, cue = 1, increment = TRUE, ...) {
   nCor <- sum(x$recalled[,,cue])
   x <- PRlearning(x, only_recalled = TRUE, samples = nCor)
   x <- CRlearning(x, only_recalled = TRUE, samples = nCor)
+  x <- practice(x)
 
 }
 
@@ -24,6 +26,7 @@ cuedRecall.PCR <- function(x, cue = 1, increment  = TRUE, ...) {
   nCor <- sum(x$recalled[,,cue])
   x <- PRlearning(x, only_recalled = TRUE, samples = nCor)
   x <- CRlearning(x, only_recalled = TRUE, samples = nCor)
+  x <- practice(x)
 
 }
 

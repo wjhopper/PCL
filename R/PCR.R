@@ -122,3 +122,12 @@ CRlearning.PCRbeta<- function(x, cue = 1, only_recalled = FALSE, samples = lengt
   }
   return(x)
 }
+
+
+
+practice_method <- function(method, cue) {
+  function(x) {
+    x$practice[paste0('Cue',cue)] <- method
+    return(x)
+  }
+}

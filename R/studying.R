@@ -7,6 +7,8 @@
 #'
 #' @export
 study <- function(x, cue = 1, ...) {
+
+  practice <- practice_method("study", cue)
   UseMethod("study")
 }
 
@@ -54,6 +56,7 @@ study.PCRbinomial <- function(x, cue = 1) {
   learned  <- matrix(rbinom(samples, to_go, x$params$LR),
                      nrow = x$nSim, ncol = x$nItems)
   x$activations[,,cue] <- x$activations[,,cue] + learned
+  x <- practice(x)
   return(x)
 
 }
@@ -71,5 +74,7 @@ study.PCRbeta <- function(x, cue = 1) {
   learned  <- matrix(rbeta(samples, activation_params$a, activation_params$b) * to_go,
                      nrow = x$nSim, ncol = x$nItems)
   x$activations[,,cue] <- x$activations[,,cue] + learned
+  x <- practice(x)
   return(x)
 }
+
