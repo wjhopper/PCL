@@ -4,7 +4,8 @@
 \alias{initPCRparams}
 \title{Create a PCRparams object to control be used by PCR functions like \code{\link{study}}.}
 \usage{
-initPCRparams(params, distribution = "beta", nFeatures, nItems, nSims, time)
+initPCRparams(params, distribution = "beta", time = 0, nFeatures = 1000,
+  nSims = 1000, nItems)
 }
 \arguments{
 \item{params}{A named list of numerics to be used as PCR model parameters.}
@@ -12,13 +13,13 @@ initPCRparams(params, distribution = "beta", nFeatures, nItems, nSims, time)
 \item{distribution}{A character vector naming the underlying distribution of
 feature activation and thresholds. Can be either \code{"beta"} or \code{"binomial"}.}
 
+\item{time}{A numeric scalar indicating the duration of the trial. If set to 0, then
+retrieval latency is not simulated by PCR functions.}
+
 \item{nFeatures}{A scalar numeric value giving the number of features each item
 is assumed to have in memory.}
 
 \item{nItems}{A scalar numeric value giving the number of items to be remembered.}
-
-\item{time}{A numeric scalar indicating the duration of the trial. If set to 0, then
-retrieval latency is not simulated by PCR functions.}
 
 \item{nSim}{A scalar numeric value giving the number of times a memory process
 should be simulated in the model.}

@@ -123,7 +123,35 @@ CRlearning.PCRbeta<- function(x, cue = 1, only_recalled = FALSE, samples = lengt
   return(x)
 }
 
+#' Summarize a PCR model condition
+#'
+#' @param x A PCR model object
+#'
+#' @return A data frame
+#' @export
+#'
+#' @examples
+#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05,
+#'                    Tmax = 75, Tmin = 0.5, lambda = .5)
+#' beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+#'                             nSims = 1000, nFeatures = 100, time = 10)
+#'
+#' init_study <- summary(beta_timed)
+#' restudy <- summary(init_study)
+#' summary(init_study)
+#' summary(restudy)
+#' restudy <- summary(beta_t_restudied)
+summary.PCR <- function(x) {
 
+  accuracy <- apply(x$activations, 3, function(y) mean(y > x$thresholds))
+  RT <- apply(x$RT, 3, median)
+  x$practice[is.na(x$practice)] <- "control"
+  prac <- toupper(substr(x$practice,1,1))
+  results <- data.frame(cue = 1:length(prac), practice = prac,
+                        accuracy, RT,
+                        row.names = NULL,
+                        stringsAsFactors = FALSE)
+}
 
 practice_method <- function(method, cue) {
   function(x) {
