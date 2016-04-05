@@ -1,6 +1,8 @@
 context("Testing study, recall, and forgetting methods")
 
 source("../sample_data.R")
+min_val <- 0
+max_val <- 100
 
 test_that("study increases feature activation but doesn't touch threshold", {
 
