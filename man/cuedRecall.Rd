@@ -9,6 +9,8 @@ cuedRecall(x, cue = 1, ...)
 \arguments{
 \item{x}{A PCR model object}
 
+\item{cue}{A scalar numeric indicating which cue to test on}
+
 \item{...}{Additional arguments that may be passed to specific methods}
 }
 \description{

@@ -52,5 +52,3 @@ binom_t_tested <- cuedRecall(binom_t_studied, cue = 1)
 # No Practice
 beta_t_no_prac <- forget(beta_t_studied, cue = 1)
 binom_t_no_prac <- forget(binom_t_studied, cue = 1)
-
-

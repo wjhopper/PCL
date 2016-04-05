@@ -1,33 +1,40 @@
 #'  PCR Cued Recall Simulation
 #'
 #' @param x A PCR model object
+#' @param cue A scalar numeric indicating which cue to test on
 #' @param ... Additional arguments that may be passed to specific methods
 #'
 #' @export
 cuedRecall <- function(x, cue = 1, ...) {
-  practice <- practice_method("test", cue)
   UseMethod("cuedRecall")
 }
 
-cuedRecall.timed <- function(x, cue = 1, increment = TRUE, ...) {
-  x$RT[,,cue] <- x$params$Tmin + (x$params$Tmax-x$params$Tmin) * exp(-x$params$lambda * abs(x$activations[,,cue]-x$thresholds))
-  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds) & (x$RT[,,cue] <= x$params$Tmax)
-  x <- space_out(x, cue)
-  nCor <- sum(x$recalled[,,cue])
-  x <- PRlearning(x, only_recalled = TRUE, samples = nCor)
-  x <- CRlearning(x, only_recalled = TRUE, samples = nCor)
-  x <- practice(x)
+#' @export
+cuedRecall.timed <- function(x, cue = 1, ...) {
 
+  x$RT[,,cue] <- RT(x, cue = 1)
+  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds) & (x$RT[,,cue] <= x$params$Tmax)
+  x <- cuedRecall.default(x, cue = 1, ...)
+  return(x)
 }
 
-cuedRecall.PCR <- function(x, cue = 1, increment  = TRUE, ...) {
-  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds)
-  x <- space_out(x, cue)
-  nCor <- sum(x$recalled[,,cue])
-  x <- PRlearning(x, only_recalled = TRUE, samples = nCor)
-  x <- CRlearning(x, only_recalled = TRUE, samples = nCor)
-  x <- practice(x)
+#' @export
+cuedRecall.PCR <- function(x, cue = 1, ...) {
 
+  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds)
+  x <- cuedRecall.default(x, cue = 1, ...)
+  return(x)
+}
+
+#' @export
+cuedRecall.default <- function(x, cue = 1, increment  = TRUE) {
+  x <- space_out(x, cue)
+  if (increment) {
+    x$activations[,,cue][x$recalled[,,cue]] <- x$PRlearning(x$activations[,,cue][x$recalled[,,cue]])
+    x$thresholds[x$recalled[,,cue]] <- x$CRlearning(x$thresholds[x$recalled[,,cue]])
+  }
+  x <- record_practice(x, "test", cue)
+  return(x)
 }
 
 space_out <- function(x, cue = 1) {

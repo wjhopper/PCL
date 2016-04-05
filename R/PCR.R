@@ -1,6 +1,4 @@
-
 #' Create a PCRparams object to control be used by PCR functions like \code{\link{study}}.
-#'
 #'
 #' @param params A named list of numerics to be used as PCR model parameters.
 #' @param distribution A character vector naming the underlying distribution of
@@ -25,6 +23,10 @@ initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 10
   x <- c(supplied, defaults[setdiff(names(defaults), c(names(supplied), "..."))])
   unevaluated <- sapply(x, is.name)
   x[unevaluated] <- lapply(x[unevaluated], eval)
+
+  x$PRlearning <- PRlearning_factory(x)
+  x$CRlearning <- CRlearning_factory(x)
+
   class(x) <- "PCRparams"
   return(x)
 }
@@ -35,11 +37,17 @@ initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 10
 #'                    distribution = "beta", nItems = 20, nSims = 1000, nFeatures = 100)
 #' new_a <- updatePCRparas(a, new = list(ER = .1, LR = .75))
 updatePCRparams <- function(x, new) {
+
   setdifference <- setdiff(names(new), names(x$params))
   if (length(setdifference) != 0) {
     stop(paste("Can't update model parameters: Parameters", setdifference, "do not exist in current parameter list"))
   }
   x$params[names(new)] <- new
+
+  # Update the PR and CR learning methods to enclose the new parameter values
+  x$PRlearning <- PRlearning_factory(x)
+  x$CRlearning <- CRlearning_factory(x)
+
   return(x)
 }
 
@@ -123,6 +131,71 @@ CRlearning.PCRbeta<- function(x, cue = 1, only_recalled = FALSE, samples = lengt
   return(x)
 }
 
+record_practice <- function(x, method, cue) {
+  x$practice[paste0('Cue',cue)] <- method
+  return(x)
+}
+
+PRlearning_factory <- function(x) {
+
+  params <- x$params
+  max <- x$nFeatures
+
+  if (x$distribution == 'beta') {
+
+    f <- function(activations, p = params$LR) {
+      to_go <- floor(max - activations)
+
+      # binomial mean = np, binomial variance = np(1-p)
+      # bernoulli mean = p, bernoulli variance = p(1-p)
+      activation_params <- betaParams(mean = p, sd = sqrt(p/to_go))
+      learned  <- rbeta(n = length(activations),
+                        shape1 = activation_params$a,
+                        shape2 = activation_params$b) * to_go
+      return(activations + learned)
+    }
+
+  } else {
+
+    f <- function(activations, p = params$LR) {
+      return(activations + rbinom(n = length(activations), size = max - activations, prob = p))
+    }
+
+  }
+
+  return(f)
+}
+
+CRlearning_factory <- function(x) {
+
+  params <- x$params
+  max <- x$nFeatures
+
+  if (x$distribution == 'beta') {
+
+    f <- function(thresholds, p = params$TR) {
+      known <- ceiling(thresholds)
+
+      # binomial mean = np, binomial variance = np(1-p)
+      # bernoulli mean = p, bernoulli variance = p(1-p)
+      thresh_params <- betaParams(mean = p, sd = sqrt((p*(1-p))/known))
+      lowered  <- rbeta(n = length(known),
+                        shape1 = thresh_params$a,
+                        shape2 = thresh_params$b) * known
+      return(thresholds - lowered)
+    }
+
+  } else {
+
+    f <- function(thresholds, p = params$TR) {
+      return(thresholds - rbinom(n = length(thresholds), size = thresholds, prob = p))
+    }
+
+  }
+
+  return(f)
+}
+
 #' Summarize a PCR model condition
 #'
 #' @param x A PCR model object
@@ -151,11 +224,4 @@ summary.PCR <- function(x) {
                         accuracy, RT,
                         row.names = NULL,
                         stringsAsFactors = FALSE)
-}
-
-practice_method <- function(method, cue) {
-  function(x) {
-    x$practice[paste0('Cue',cue)] <- method
-    return(x)
-  }
 }
