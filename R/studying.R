@@ -23,7 +23,6 @@ study.PCRparams <- function(x, nCues = 1, ...) {
     activation_params <- betaParams(mean = x$params$ER, sd = sqrt(x$params$ER/x$nFeatures))
     mems <- replicate(nCues, matrix(rbeta(x$nSim*x$nItems, activation_params$a, activation_params$b) * x$nFeatures,
                                     nrow = x$nSim, ncol = x$nItems))
-    mems <- setNames(mems,  paste0("cue", 1:nCues))
     thresh_params <- betaParams(mean = .5,sd = x$params$TV)
     thresh <- matrix(rbeta(x$nSim*x$nItems, thresh_params$a, thresh_params$b) * x$nFeatures,
                      nrow = x$nSim, ncol = x$nItems)
@@ -34,6 +33,8 @@ study.PCRparams <- function(x, nCues = 1, ...) {
     # rbinom(number of repetitions, number of binomial trials, probability of success)
     thresh <- rbinom(x$nSim*x$nItems, x$nFeat, .5)
   }
+
+  `dimnames<-`(mems, list(NULL, NULL,  paste0("cue", 1:nCues)))
 
   object <- c(list(activations = mems, thresholds = thresh,
                    recalled = array(NA, dim = c(x$nSim, x$nItems, nCues)),
