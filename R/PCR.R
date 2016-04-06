@@ -17,9 +17,11 @@
 #' @export
 #'
 #' @examples
-#' a <- initPCRparams(params = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),
-#'                    distribution = "beta", nItems = 20, nSims = 1000,
-#'                    nFeatures = 100, time = 10)
+#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
+#'
+#' beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+#'                            nSims = 1000, nFeatures = 100, time = 10)
+#'
 initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 1000, nSims = 1000, nItems) {
 
   supplied <- as.list(match.call(expand.dots = TRUE))[-1]
@@ -40,9 +42,11 @@ initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 10
 #' @description  Update PCRparams object and method with new parameter values
 #' @export
 #' @examples
-#' a <- initPCRparams(parameters = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),
-#'                    distribution = "beta", nItems = 20, nSims = 1000, nFeatures = 100)
-#' new_a <- updatePCRparams(a, new = list(ER = .1, LR = .75))
+#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
+#'
+#' beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+#'                            nSims = 1000, nFeatures = 100, time = 10)
+#' new <- updatePCRparams(a, new = list(ER = .1, LR = .75))
 updatePCRparams <- function(x, new) {
 
   setdifference <- setdiff(names(new), names(x$params))
