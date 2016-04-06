@@ -1,18 +1,21 @@
-#' Create a PCRparams object to control be used by PCR functions like \code{\link{study}}.
+#' Title
 #'
 #' @param params A named list of numerics to be used as PCR model parameters.
 #' @param distribution A character vector naming the underlying distribution of
 #' feature activation and thresholds. Can be either \code{"beta"} or \code{"binomial"}.
-#' @param nFeatures A scalar numeric value giving the number of features each item
-#' is assumed to have in memory.
-#' @param nItems A scalar numeric value giving the number of items to be remembered.
-#' @param nSim A scalar numeric value giving the number of times a memory process
-#' should be simulated in the model.
 #' @param time A numeric scalar indicating the duration of the trial. If set to 0, then
 #' retrieval latency is not simulated by PCR functions.
+#' @param nFeatures A scalar numeric value giving the number of features each item
+#' is assumed to have in memory.
+#' @param nSims A scalar numeric value giving the number of times a memory process
+#' should be simulated in the model.
+#' @param nItems A scalar numeric value giving the number of items to be remembered.
+#'
+#' @return A PCRparams object
 #'
 #' @importFrom whoppeR betaParams
 #' @export
+#'
 #' @examples
 #' a <- initPCRparams(params = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),
 #'                    distribution = "beta", nItems = 20, nSims = 1000,
@@ -32,11 +35,13 @@ initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 10
   return(x)
 }
 
+#' @title updatePCRparams
+#' @description  Update PCRparams object and method with new parameter values
 #' @export
 #' @examples
 #' a <- initPCRparams(parameters = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),
 #'                    distribution = "beta", nItems = 20, nSims = 1000, nFeatures = 100)
-#' new_a <- updatePCRparas(a, new = list(ER = .1, LR = .75))
+#' new_a <- updatePCRparams(a, new = list(ER = .1, LR = .75))
 updatePCRparams <- function(x, new) {
 
   setdifference <- setdiff(names(new), names(x$params))

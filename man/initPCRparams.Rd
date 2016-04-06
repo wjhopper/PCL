@@ -2,7 +2,7 @@
 % Please edit documentation in R/PCR.R
 \name{initPCRparams}
 \alias{initPCRparams}
-\title{Create a PCRparams object to control be used by PCR functions like \code{\link{study}}.}
+\title{Title}
 \usage{
 initPCRparams(params, distribution = "beta", time = 0, nFeatures = 1000,
   nSims = 1000, nItems)
@@ -19,13 +19,16 @@ retrieval latency is not simulated by PCR functions.}
 \item{nFeatures}{A scalar numeric value giving the number of features each item
 is assumed to have in memory.}
 
-\item{nItems}{A scalar numeric value giving the number of items to be remembered.}
-
-\item{nSim}{A scalar numeric value giving the number of times a memory process
+\item{nSims}{A scalar numeric value giving the number of times a memory process
 should be simulated in the model.}
+
+\item{nItems}{A scalar numeric value giving the number of items to be remembered.}
+}
+\value{
+A PCRparams object
 }
 \description{
-Create a PCRparams object to control be used by PCR functions like \code{\link{study}}.
+Title
 }
 \examples{
 a <- initPCRparams(params = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),

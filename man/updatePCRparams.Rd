@@ -2,12 +2,16 @@
 % Please edit documentation in R/PCR.R
 \name{updatePCRparams}
 \alias{updatePCRparams}
+\title{updatePCRparams}
 \usage{
 updatePCRparams(x, new)
+}
+\description{
+Update PCRparams object and method with new parameter values
 }
 \examples{
 a <- initPCRparams(parameters = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),
                    distribution = "beta", nItems = 20, nSims = 1000, nFeatures = 100)
-new_a <- updatePCRparas(a, new = list(ER = .1, LR = .75))
+new_a <- updatePCRparams(a, new = list(ER = .1, LR = .75))
 }
 
