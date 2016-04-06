@@ -33,8 +33,9 @@ cuedRecall.default <- function(x, cue = 1, increment  = TRUE) {
   if (increment) {
     x$activations[,,cue][x$recalled[,,cue]] <- x$PRlearning(x$activations[,,cue][x$recalled[,,cue]])
     x$thresholds[x$recalled[,,cue]] <- x$CRlearning(x$thresholds[x$recalled[,,cue]])
+    x <- record_practice(x, "test", cue)
   }
-  x <- record_practice(x, "test", cue)
+
   return(x)
 }
 
