@@ -7,11 +7,4 @@
 freeRecall(mem, thresh, space = NULL, Tmin = NULL, Tmax = NULL,
   Time = NULL, lambda = NULL)
 }
-\arguments{
-\item{x}{A PCR model object}
-
-\item{cue}{A numeric value indicating which cue a test is simulated for}
-
-\item{...}{Additional arguments passed to specific methods}
-}
 

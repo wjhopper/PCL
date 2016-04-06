@@ -11,6 +11,7 @@
 #' @param time A numeric scalar indicating the duration of the trial. If set to 0, then
 #' retrieval latency is not simulated by PCR functions.
 #'
+#' @importFrom whoppeR betaParams
 #' @export
 #' @examples
 #' a <- initPCRparams(params = list(ER=.6, LR=.2, FR=.1, TR=.15, TV = .05),
@@ -48,86 +49,6 @@ updatePCRparams <- function(x, new) {
   x$PRlearning <- PRlearning_factory(x)
   x$CRlearning <- CRlearning_factory(x)
 
-  return(x)
-}
-
-
-#' @title PR Learning
-#' @description Strengthening of Cue --> Target associations on un-encoded features
-#'
-#' @param x  An object used to select a method
-#' @param ... Additional arugments passed to other methods.
-#'
-#' @export
-PRlearning<- function(x, ...) {
-  UseMethod("PRlearning")
-}
-
-#' @export
-PRlearning.PCRbinomial<- function(x, cue = 1, only_recalled = FALSE, samples = length(x$activations[,,cue]), ...) {
-  if (only_recalled) {
-    x$activations[,,cue][x$recalled[,,cue]] <- x$activations[,,cue][x$recalled[,,cue]] +
-      rbinom(samples, x$nFeatures - x$activations[,,cue][x$recalled[,,cue]], x$params$LR)
-  } else {
-    x$activations[,,cue] <- x$activations[,,cue] + rbinom(samples, x$nFeatures - x$activations[,,cue], x$params$LR)
-  }
-  return(x)
-}
-
-#' @export
-PRlearning.PCRbeta<- function(x, cue = 1, only_recalled = FALSE, samples = length(x$activations[,,cue]),  ...) {
-  if (only_recalled) {
-    to_go <- floor(x$nFeatures - x$activations[,,cue][x$recalled[,,cue]])
-    activation_params <- betaParams(mean = x$params$LR,
-                                    sd = sqrt(x$params$LR/to_go))
-    learned  <- rbeta(samples, activation_params$a, activation_params$b) * to_go
-    x$activations[,,cue][x$recalled[,,cue]] <- x$activations[,,cue][x$recalled[,,cue]] + learned
-
-  } else {
-    to_go <- floor(x$nFeatures - x$activations[,,cue])
-    activation_params <- betaParams(mean = x$params$LR, sd = sqrt(x$params$LR/to_go))
-    learned  <- rbeta(samples, activation_params$a, activation_params$b) * to_go
-    x$activations[,,cue] <- x$activations[,,cue] + learned
-  }
-  return(x)
-}
-
-
-#' @title CR Learning
-#' @description Strengthening of Target feature --> Target feature associations
-#'
-#' @param x  An object used to select a method
-#' @param ... Additional arugments passed to other methods.
-#'
-#' @export
-CRlearning<- function(x, ...) {
-  UseMethod("CRlearning")
-}
-
-#' @export
-CRlearning.PCRbinomial<- function(x, cue = 1, only_recalled = FALSE, samples = length(x$activations[,,cue]), ...) {
-  if (only_recalled) {
-    x$threshold[x$recalled[,,cue]] <- x$threshold[x$recalled[,,cue]] - rbinom(samples, x$threshold[x$recalled[,,cue]], x$params$TR)
-  } else {
-    x$threshold <- x$threshold - rbinom(samples, x$threshold, x$params$TR)
-  }
-  return(x)
-}
-
-#' @export
-CRlearning.PCRbeta<- function(x, cue = 1, only_recalled = FALSE, samples = length(x$activations[,,cue]),  ...) {
-  if (only_recalled) {
-    known <- ceiling(x$thresholds[x$recalled[,,cue]])
-    thresh_params <- betaParams(mean = x$params$TR, sd = sqrt(x$params$TR/known))
-    lowered  <- rbeta(samples, thresh_params$a, thresh_params$b) * known
-    x$thresholds[x$recalled[,,cue]] <- x$thresholds[x$recalled[,,cue]] - lowered
-
-  } else {
-    known <- ceiling(x$thresholds)
-    thresh_params <- betaParams(mean = x$params$TR, sd = sqrt(x$params$TR/known))
-    lowered <- rbeta(samples, thresh_params$a, thresh_params$b) * known
-    x$thresholds <- x$thresholds - lowered
-  }
   return(x)
 }
 

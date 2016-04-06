@@ -7,11 +7,12 @@
 cuedRecall(x, cue = 1, ...)
 }
 \arguments{
-\item{x}{A PCR model object}
+\item{x}{An object used to select a method. The PCR package implements methods
+for \code{timed} and \code{PCR} objects.}
 
 \item{cue}{A scalar numeric indicating which cue to test on}
 
-\item{...}{Additional arguments that may be passed to specific methods}
+\item{...}{Additional arugments passed to other methods.}
 }
 \description{
 PCR Cued Recall Simulation

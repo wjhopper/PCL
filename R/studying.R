@@ -1,17 +1,19 @@
 #' @title Study
-#' @aliases PRlearning
 #' @description Effects of studying on un-encoded features
 #'
-#' @param x  An object used to select a method
+#' @param x  An object used to select a method. The PCR package implements methods
+#' for \code{timed} and \code{PCR} objects.
 #' @param ... Additional arugments passed to other methods.
 #'
 #' @export
-study <- function(x, cue = 1, ...) {
+study <- function(x, ...) {
   UseMethod("study")
 }
 
+#' @describeIn study Effects of the initial study on memory
+#' @param x A PCR model object
+#' @param cue A scalar numeric indicating which cue to test on
 #' @export
-#' @importFrom whoppeR betaParams
 study.PCRparams <- function(x, nCues = 1, ...) {
 
   starting_point <- matrix(0L, nrow = x$nSim, ncol = x$nItems)

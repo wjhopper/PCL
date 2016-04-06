@@ -1,14 +1,11 @@
-#'  PCR Cued Recall Simulation
-#'
-#' @param x A PCR model object
-#' @param cue A scalar numeric indicating which cue to test on
-#' @param ... Additional arguments that may be passed to specific methods
-#'
+#' PCR Cued Recall Simulation
+#' @inheritParams study
 #' @export
 cuedRecall <- function(x, cue = 1, ...) {
   UseMethod("cuedRecall")
 }
 
+#' @inheritParams study.PCR
 #' @export
 cuedRecall.timed <- function(x, cue = 1, ...) {
 
@@ -18,6 +15,7 @@ cuedRecall.timed <- function(x, cue = 1, ...) {
   return(x)
 }
 
+#' @inheritParams study.PCR
 #' @export
 cuedRecall.PCR <- function(x, cue = 1, ...) {
 
@@ -26,6 +24,9 @@ cuedRecall.PCR <- function(x, cue = 1, ...) {
   return(x)
 }
 
+#' @inheritParams study.PCR
+#' param increment A logical scalar indicating whether or not to update feature activation
+#' and item thresholds based on the outcome of the test.
 #' @export
 cuedRecall.default <- function(x, cue = 1, increment  = TRUE) {
   x <- space_out(x, cue)
@@ -46,32 +47,23 @@ space_out <- function(x, cue = 1) {
 }
 
 #' @title PCR Free Recall Simulation
-#' @param x A PCR model object
-#' @param cue A numeric value indicating which cue a test is simulated for
-#' @param ... Additional arguments passed to specific methods
-#'
+#' @inheritParams study
 #' @export
 freeRecall <- function(x, cue = 1, ...) {
   UseMethod("freeRecall")
 }
 
+#' @inheritParams study.PCR
 #' @export
 freeRecall.timed <- function(x, cue = 1, ...) {
 
 }
 
-#' @importFrom dplyr first
+#' @inheritParams study.PCR
 #' @export
-freeRecall.PCRbinomial <- function(x, cue = 1, ...) {
+freeRecall.PCR <- function(x, cue = 1, ...) {
 
 }
-
-#' @importFrom dplyr first
-#' @export
-freeRecall.PCRbeta <- function(x, cue = 1, ...) {
-
-}
-
 freeRecall <- function(mem, thresh, space=NULL,Tmin=NULL,Tmax=NULL,
                        Time=NULL,lambda=NULL) {
   if (is.null(time)) {
