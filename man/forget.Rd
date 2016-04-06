@@ -2,16 +2,23 @@
 % Please edit documentation in R/forgetting.R
 \name{forget}
 \alias{forget}
-\title{Forget}
+\alias{forget.PCR}
+\title{forget}
 \usage{
-forget(x, cue = 1, ...)
+forget(x, ...)
+
+\method{forget}{PCR}(x, cue = 1)
 }
 \arguments{
-\item{x}{An object used to select a method}
+\item{x}{An object used to select a method. The PCR package implements methods
+for \code{timed} and \code{PCR} objects.}
 
 \item{...}{Additional arugments passed to other methods.}
+
+\item{cue}{A scalar numeric indicating which cue to test on}
 }
-\description{
-Effects of interference on encoded features
-}
+\section{Methods (by class)}{
+\itemize{
+\item \code{PCR}: Effects of interference on encoded features
+}}
 

@@ -16,8 +16,6 @@ study <- function(x, ...) {
 #' @export
 study.PCRparams <- function(x, nCues = 1, ...) {
 
-  starting_point <- matrix(0L, nrow = x$nSim, ncol = x$nItems)
-
   mems <- replicate(nCues, x$PRlearning(matrix(0L, nrow = x$nSim, ncol = x$nItems),
                                         p = x$params$ER))
   `dimnames<-`(mems, list(NULL, NULL,  paste0("cue", 1:nCues)))
@@ -37,8 +35,10 @@ study.PCRparams <- function(x, nCues = 1, ...) {
   return(object)
 }
 
+#' @describeIn study Effects restudying on feature activation memory
+#' @inheritParams study.PCRparams
 #' @export
-study.PCR<- function(x, cue = 1) {
+study.PCR<- function(x, cue = 1, ...) {
   x$activations[,,cue] <- x$PRlearning(x$activations[,,cue], p = x$params$LR)
   x <- record_practice(x, "study", cue)
   return(x)

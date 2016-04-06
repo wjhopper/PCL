@@ -2,12 +2,15 @@
 % Please edit documentation in R/studying.R
 \name{study}
 \alias{study}
+\alias{study.PCR}
 \alias{study.PCRparams}
 \title{Study}
 \usage{
 study(x, ...)
 
 \method{study}{PCRparams}(x, nCues = 1, ...)
+
+\method{study}{PCR}(x, cue = 1, ...)
 }
 \arguments{
 \item{x}{An object used to select a method. The PCR package implements methods
@@ -15,9 +18,9 @@ for \code{timed} and \code{PCR} objects.}
 
 \item{...}{Additional arugments passed to other methods.}
 
-\item{x}{A PCR model object}
-
 \item{cue}{A scalar numeric indicating which cue to test on}
+
+\item{x}{A PCR model object}
 }
 \description{
 Effects of studying on un-encoded features
@@ -25,5 +28,7 @@ Effects of studying on un-encoded features
 \section{Methods (by class)}{
 \itemize{
 \item \code{PCRparams}: Effects of the initial study on memory
+
+\item \code{PCR}: Effects restudying on feature activation memory
 }}
 

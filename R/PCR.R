@@ -30,6 +30,7 @@ initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 10
 
   x$PRlearning <- PRlearning_factory(x)
   x$CRlearning <- CRlearning_factory(x)
+  x$PRforgetting <- PRforgetting_factory(x)
 
   class(x) <- "PCRparams"
   return(x)
@@ -70,7 +71,7 @@ PRlearning_factory <- function(x) {
   if (x$distribution == 'beta') {
 
     f <- function(activations, p = params$LR) {
-      to_go <- floor(max - activations)
+      to_go <- ceiling(max - activations)
 
       # binomial mean = np, binomial variance = np(1-p)
       # bernoulli mean = p, bernoulli variance = p(1-p)
@@ -91,6 +92,39 @@ PRlearning_factory <- function(x) {
 
   return(f)
 }
+
+PRforgetting_factory <- function(x) {
+
+  params <- x$params
+  max <- x$nFeatures
+
+  if (x$distribution == 'beta') {
+
+    f <- function(activations, p = params$FR) {
+      to_go <- ceiling(activations)
+
+      # binomial mean = np, binomial variance = np(1-p)
+      # bernoulli mean = p, bernoulli variance = p(1-p)
+      activation_params <- betaParams(mean = p, sd = sqrt(p/to_go))
+      forgot  <- rbeta(n = length(activations),
+                       shape1 = activation_params$a,
+                       shape2 = activation_params$b) * to_go
+      return(activations - forgot)
+    }
+
+  } else {
+
+    f <- function(activations, p = params$FR) {
+      # rbinom(number of repetitions, number of binomial trials, probability of success)
+      forgot <- rbinom(n = length(activations), size = activations, prob = p)
+      return(activations - forgot)
+    }
+
+  }
+
+  return(f)
+}
+
 
 CRlearning_factory <- function(x) {
 
