@@ -9,9 +9,9 @@ cuedRecall <- function(x, cue = 1, ...) {
 #' @export
 cuedRecall.timed <- function(x, cue = 1, ...) {
 
-  x$RT[,,cue] <- RT(x, cue = 1)
+  x$RT[,,cue] <- RT(x, cue = cue)
   x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds) & (x$RT[,,cue] <= x$params$Tmax)
-  x <- cuedRecall.default(x, cue = 1, ...)
+  x <- cuedRecall.default(x, cue = cue, ...)
   return(x)
 }
 
@@ -20,7 +20,7 @@ cuedRecall.timed <- function(x, cue = 1, ...) {
 cuedRecall.PCR <- function(x, cue = 1, ...) {
 
   x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds)
-  x <- cuedRecall.default(x, cue = 1, ...)
+  x <- cuedRecall.default(x, cue = cue, ...)
   return(x)
 }
 
