@@ -2,6 +2,7 @@
 #' @inheritParams study
 #' @export
 cuedRecall <- function(x, cue = 1, ...) {
+  test_num <- sapply(x$recalled[cue], function(y) min(which(is.na(y[1,1,]))))
   UseMethod("cuedRecall")
 }
 
@@ -9,9 +10,10 @@ cuedRecall <- function(x, cue = 1, ...) {
 #' @export
 cuedRecall.timed <- function(x, cue = 1, ...) {
 
-  x$RT[,,cue] <- RT(x, cue = cue)
-  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds) & (x$RT[,,cue] <= x$params$Tmax)
-  x <- cuedRecall.default(x, cue = cue, ...)
+  x$RT[[cue]][,, test_num] <- RT(x, cue = cue)
+  x$recalled[[cue]][,, test_num] <- (x$activations[,,cue] > x$thresholds) &
+                                    (x$RT[[cue]][,, test_num] <= x$params$Tmax)
+  x <- cuedRecall.default(x, cue = cue, test_num = test_num, ...)
   return(x)
 }
 
@@ -19,8 +21,8 @@ cuedRecall.timed <- function(x, cue = 1, ...) {
 #' @export
 cuedRecall.PCR <- function(x, cue = 1, ...) {
 
-  x$recalled[,,cue] <- (x$activations[,,cue] > x$thresholds)
-  x <- cuedRecall.default(x, cue = cue, ...)
+  x$recalled[[cue]][,, test_num] <- (x$activations[,,cue] > x$thresholds)
+  x <- cuedRecall.default(x, cue = cue, test_num = test_num, ...)
   return(x)
 }
 
@@ -28,21 +30,25 @@ cuedRecall.PCR <- function(x, cue = 1, ...) {
 #' param increment A logical scalar indicating whether or not to update feature activation
 #' and item thresholds based on the outcome of the test.
 #' @export
-cuedRecall.default <- function(x, cue = 1, increment  = TRUE) {
-  x <- space_out(x, cue)
+cuedRecall.default <- function(x, cue = 1, test_num = 1, increment  = TRUE) {
+
+  x <- space_out(x, cue, test_num = test_num)
   if (increment) {
-    x$activations[,,cue][x$recalled[,,cue]] <- x$PRlearning(x$activations[,,cue][x$recalled[,,cue]])
-    x$thresholds[x$recalled[,,cue]] <- x$CRlearning(x$thresholds[x$recalled[,,cue]])
+    feature_updates <- x$PRlearning(x$activations[,,cue][x$recalled[[cue]][,,test_num]])
+    x$activations[,,cue][x$recalled[[cue]][,,test_num]] <- feature_updates
+    threshold_updates <-  x$CRlearning(x$thresholds[x$recalled[[cue]][,,test_num]])
+    x$thresholds[x$recalled[[cue]][,,test_num]] <- threshold_updates
     x <- record_practice(x, "test", cue)
   }
 
   return(x)
 }
 
-space_out <- function(x, cue = 1) {
+space_out <- function(x, cue = 1, test_num = 1) {
   if ('space' %in% names(x$params) && x$params$space >= 0) {
     # recalled items stay the same with probability 1-space out
-    x$recalled[,,cue][x$recalled[,,cue]] <- rbinom(sum(x$recalled[,,cue]), 1, 1-x$params$space)
+    not_spaced <- as.logical(rbinom(sum(x$recalled[[cue]][,,test_num]), 1, 1-x$params$space))
+    x$recalled[[cue]][,,test_num][x$recalled[[cue]][,,test_num]] <- not_spaced
   }
   return(x)
 }

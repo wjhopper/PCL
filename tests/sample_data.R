@@ -16,10 +16,10 @@ binom_untimed <- initPCRparams(params = param_list, distribution = "binomial",nI
                                nSims = 1000, nFeatures = 100)
 
 # Initial Study
-beta_t_studied <- study(beta_timed, nCues = 2)
-binom_t_studied <- study(binom_timed, nCues = 2)
-beta_studied <- study(beta_untimed, nCues = 2)
-binom_studied <- study(binom_untimed, nCues = 2)
+beta_t_studied <- study(beta_timed, nCues = 2, tests_per_cue = c(1,1))
+binom_t_studied <- study(binom_timed, nCues = 2, tests_per_cue = c(1,1))
+beta_studied <- study(beta_untimed, nCues = 2, tests_per_cue = c(1,1))
+binom_studied <- study(binom_untimed, nCues = 2, tests_per_cue = c(1,1))
 
 # Restudy
 beta_t_restudied <- study(beta_t_studied, cue = 1)

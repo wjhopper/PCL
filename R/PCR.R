@@ -63,7 +63,7 @@ updatePCRparams <- function(x, new) {
 }
 
 record_practice <- function(x, method, cue) {
-  x$practice[paste0('Cue',cue)] <- method
+  x$practice[[cue]] <- c(x$practice[[cue]], method)
   return(x)
 }
 
@@ -180,12 +180,21 @@ CRlearning_factory <- function(x) {
 #' restudy <- summary(beta_t_restudied)
 summary.PCR <- function(x) {
 
-  accuracy <- apply(x$recalled, 3, mean)
-  RT <- apply(x$RT, 3, median)
-  x$practice[is.na(x$practice)] <- "control"
-  prac <- toupper(substr(x$practice,1,1))
-  results <- data.frame(cue = 1:length(prac), practice = prac,
-                        accuracy, RT,
-                        row.names = NULL,
-                        stringsAsFactors = FALSE)
+  nCues <- dim(x$activations)[3]
+  # x$practice[is.na(x$practice)] <- "control"
+  x$practice <- lapply(x$practice, function(x) ifelse(is.null(x), "C", toupper(substr(x, 1, 1))))
+
+
+  IV <- lapply(1:nCues, function(cue) {
+    if (!is.na(x$recalled[cue])) {
+      nTests <- dim(x$recalled[[cue]])[3]
+      recalled <- apply(x$recalled[[cue]], 3, mean)
+      RT <- apply(x$RT[[cue]], 3, median)
+      data.frame(cue, practice = x$practice[[cue]],
+                 test = 1:nTests, accuracy = recalled, RT,
+                 row.names = NULL, stringsAsFactors = FALSE)
+    }
+  })
+
+  return(do.call(rbind, IV))
 }

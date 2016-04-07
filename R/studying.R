@@ -14,17 +14,31 @@ study <- function(x, ...) {
 #' @param x A PCR model object
 #' @param cue A scalar numeric indicating which cue to test on
 #' @export
-study.PCRparams <- function(x, nCues = 1, ...) {
+study.PCRparams <- function(x, nCues = 1, tests_per_cue = 1, ...) {
+
+  if (length(tests_per_cue) == 1) {
+    tests_per_cue <- rep(tests_per_cue, times = nCues)
+  }
+
+  create_recalled_array <- function(cue) {
+    if (tests_per_cue[cue] > 0) {
+      element <- array(dim = c(x$nSim, x$nItems, tests_per_cue[cue]))
+    } else {
+      element <- NA
+    }
+    return(element)
+  }
 
   mems <- replicate(nCues, x$PRlearning(matrix(0L, nrow = x$nSim, ncol = x$nItems),
                                         p = x$params$ER))
   `dimnames<-`(mems, list(NULL, NULL,  paste0("cue", 1:nCues)))
   thresh <- x$CRlearning(matrix(100L, nrow = x$nSim, ncol = x$nItems),
                          p = .5)
+  recalled <- setNames(lapply(1:nCues, create_recalled_array),
+                       paste0("Cue",1:nCues))
 
-  object <- c(list(activations = mems, thresholds = thresh,
-                   recalled = array(NA, dim = c(x$nSim, x$nItems, nCues)),
-                   practice = setNames(rep(NA, nCues), paste0("Cue",1:nCues))),
+  object <- c(list(activations = mems, thresholds = thresh, recalled = recalled,
+                   practice = setNames(rep(list(NULL), nCues), paste0("Cue",1:nCues))),
               x)
 
   if (x$time > 0) {

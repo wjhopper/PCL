@@ -8,7 +8,7 @@
 \usage{
 study(x, ...)
 
-\method{study}{PCRparams}(x, nCues = 1, ...)
+\method{study}{PCRparams}(x, nCues = 1, tests_per_cue = 1, ...)
 
 \method{study}{PCR}(x, cue = 1, ...)
 }
