@@ -3,16 +3,16 @@ set.seed(919)
 
 param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
 
-beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
                             nSims = 1000, nFeatures = 100, time = 10)
 
-binom_timed <- initPCRparams(params = param_list, distribution = "binomial",nItems = 20,
+binom_timed <- initPCR(params = param_list, distribution = "binomial",nItems = 20,
                              nSims = 1000, nFeatures = 100, time = 10)
 
-beta_untimed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+beta_untimed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
                               nSims = 1000, nFeatures = 100)
 
-binom_untimed <- initPCRparams(params = param_list, distribution = "binomial",nItems = 20,
+binom_untimed <- initPCR(params = param_list, distribution = "binomial",nItems = 20,
                                nSims = 1000, nFeatures = 100)
 
 # Initial Study

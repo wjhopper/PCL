@@ -19,10 +19,10 @@
 #' @examples
 #' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
 #'
-#' beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+#' beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
 #'                            nSims = 1000, nFeatures = 100, time = 10)
 #'
-initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 1000, nSims = 1000, nItems) {
+initPCR <- function(params, distribution = "beta", time = 0, nFeatures= 1000, nSims = 1000, nItems) {
 
   supplied <- as.list(match.call(expand.dots = TRUE))[-1]
   defaults <- formals()
@@ -44,7 +44,7 @@ initPCRparams <- function(params, distribution = "beta", time = 0, nFeatures= 10
 #' @examples
 #' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
 #'
-#' beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+#' beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
 #'                            nSims = 1000, nFeatures = 100, time = 10)
 #' new <- updatePCRparams(a, new = list(ER = .1, LR = .75))
 updatePCRparams <- function(x, new) {
@@ -170,7 +170,7 @@ CRlearning_factory <- function(x) {
 #' @examples
 #' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05,
 #'                    Tmax = 75, Tmin = 0.5, lambda = .5)
-#' beta_timed <- initPCRparams(params = param_list, distribution = "beta", nItems = 20,
+#' beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
 #'                             nSims = 1000, nFeatures = 100, time = 10)
 #'
 #' init_study <- summary(beta_timed)
