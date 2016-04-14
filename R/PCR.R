@@ -165,6 +165,8 @@ CRlearning_factory <- function(x) {
 #' @param x A PCR model object
 #'
 #' @return A data frame
+#'
+#' @importFrom dplyr tbl_df
 #' @export
 #'
 #' @examples
@@ -180,21 +182,23 @@ CRlearning_factory <- function(x) {
 #' restudy <- summary(beta_t_restudied)
 summary.PCR <- function(x) {
 
+  x$practice <- lapply(x$practice, function(x) ifelse(is.null(x), "none", x))
   nCues <- dim(x$activations)[3]
-  # x$practice[is.na(x$practice)] <- "control"
-  x$practice <- lapply(x$practice, function(x) ifelse(is.null(x), "C", toupper(substr(x, 1, 1))))
-
-
-  IV <- lapply(1:nCues, function(cue) {
-    if (!is.na(x$recalled[cue])) {
-      nTests <- dim(x$recalled[[cue]])[3]
-      recalled <- apply(x$recalled[[cue]], 3, mean)
-      RT <- apply(x$RT[[cue]], 3, median)
-      data.frame(cue, practice = x$practice[[cue]],
-                 test = 1:nTests, accuracy = recalled, RT,
-                 row.names = NULL, stringsAsFactors = FALSE)
-    }
-  })
-
+  IV <- lapply(1:nCues, cue_summary, x)
   return(do.call(rbind, IV))
+}
+
+cue_summary <- function(cue, x) {
+  if (!is.na(x$recalled[cue])) {
+    nTests <- dim(x$recalled[[cue]])[3]
+    recalled <- apply(x$recalled[[cue]], 3, mean)
+    rawRTs <- apply(x$RT[[cue]], 3, as.vector)
+    rawRTs <- lapply(seq_len(ncol(rawRTs)), function(i) rawRTs[,i])
+    medianRT <- sapply(rawRTs, median)
+    IV <- tbl_df(data.frame(cue, practice = x$practice[[cue]],
+                            test = 1:nTests, accuracy = recalled, medianRT,
+                            row.names = NULL, stringsAsFactors = FALSE))
+    IV$rawRT <- rawRTs
+    return(IV)
+  }
 }

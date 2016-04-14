@@ -8,8 +8,8 @@ tested <- summary(beta_t_tested)
 control <- summary(beta_t_no_prac)
 
 test_that("Practice methods are correctly specified", {
-  expect_equal(init_study$practice, c("C","C"))
-  expect_equal(restudy$practice, c("S","C"))
-  expect_equal(tested$practice, c("T","C"))
-  expect_equal(control$practice, c("C","C"))
+  expect_equal(init_study$practice, c("none","none"))
+  expect_equal(restudy$practice, c("study","none"))
+  expect_equal(tested$practice, c("test","none"))
+  expect_equal(control$practice, c("none","none"))
 })
