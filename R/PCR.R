@@ -191,14 +191,30 @@ summary.PCR <- function(x) {
 cue_summary <- function(cue, x) {
   if (!is.na(x$recalled[cue])) {
     nTests <- dim(x$recalled[[cue]])[3]
-    recalled <- apply(x$recalled[[cue]], 3, mean)
+    recalled <- apply(x$recalled[[cue]], 3, as.vector)
+    recalled <- lapply(seq_len(ncol(recalled)), function(i) recalled[,i])
     rawRTs <- apply(x$RT[[cue]], 3, as.vector)
     rawRTs <- lapply(seq_len(ncol(rawRTs)), function(i) rawRTs[,i])
-    medianRT <- sapply(rawRTs, median)
+    correct_RT <- Map(`[`, rawRTs, recalled)
+    incorrect_RT <- Map(`[`, rawRTs, lapply(recalled, `!`))
+    accuracy <- as.vector(sapply(recalled, function(x) {m <- mean(x); c(m, 1-mean(x))}))
+    medianRT <- as.vector(matrix(c(sapply(correct_RT, median),
+                                   sapply(incorrect_RT, median)),
+                                 byrow = TRUE, ncol = 2))
+    rawRTs <- c(correct_RT, incorrect_RT)
     IV <- tbl_df(data.frame(cue, practice = x$practice[[cue]],
-                            test = 1:nTests, accuracy = recalled, medianRT,
+                            test = rep(1:nTests, each = length(accuracy)/nTests),
+                            accuracy =rep(c(1,0), times = nTests),
+                            proportion = accuracy,
+                            medianRT = medianRT,
                             row.names = NULL, stringsAsFactors = FALSE))
-    IV$rawRT <- rawRTs
+
+    if (length(rawRTs) > 2) {
+      IV$rawRTs <- rawRTs[order(c(seq_along(correct_RT), seq_along(incorrect_RT)))]
+    } else {
+      IV$rawRTs <- rawRTs
+    }
+
     return(IV)
   }
 }
