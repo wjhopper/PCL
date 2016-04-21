@@ -17,12 +17,13 @@
 #' @export
 #'
 #' @examples
-#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
-#'
-#' beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
-#'                            nSims = 1000, nFeatures = 100, time = 10)
-#'
-initPCR <- function(params, distribution = "beta", time = 0, nFeatures= 1000, nSims = 1000, nItems) {
+#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05,
+#'                    Tmax = 75, Tmin = 0.5, lambda = .5)
+#' beta_timed <- initPCR(params = param_list, distribution = "beta", time = 10,
+#'                       nFeatures = 100, nSims = 1000, nItems = 20)
+#' str(beta_timed, give.attr=FALSE)
+initPCR <- function(params, distribution = "beta", time = 0,
+                    nFeatures= 1000, nSims = 1000, nItems) {
 
   supplied <- as.list(match.call(expand.dots = TRUE))[-1]
   defaults <- formals()
@@ -38,16 +39,17 @@ initPCR <- function(params, distribution = "beta", time = 0, nFeatures= 1000, nS
   return(x)
 }
 
-#' @title updatePCRparams
-#' @description  Update PCRparams object and method with new parameter values
+#' @title update.PCRparams
+#' @description Update a PCRparams object and methods with new parameter values
 #' @export
 #' @examples
-#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
-#'
-#' beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
-#'                            nSims = 1000, nFeatures = 100, time = 10)
-#' new <- updatePCRparams(a, new = list(ER = .1, LR = .75))
-updatePCRparams <- function(x, new) {
+#' param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05,
+#'                    Tmax = 75, Tmin = 0.5, lambda = .5)
+#' beta_timed <- initPCR(params = param_list, distribution = "beta", time = 10,
+#'                       nFeatures = 100, nSims = 1000, nItems = 20)
+#' new <- update(beta_timed, new = list(ER = .1, LR = .75))
+#' print(new$params)
+update.PCRparams <- function(x, new) {
 
   setdifference <- setdiff(names(new), names(x$params))
   if (length(setdifference) != 0) {
@@ -58,6 +60,7 @@ updatePCRparams <- function(x, new) {
   # Update the PR and CR learning methods to enclose the new parameter values
   x$PRlearning <- PRlearning_factory(x)
   x$CRlearning <- CRlearning_factory(x)
+  x$PRforgetting <- PRforgetting_factory(x)
 
   return(x)
 }

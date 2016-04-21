@@ -1,6 +1,6 @@
 Package: PCR
 Title: Primary and Convergent Retreival model
-Version: 1.0.2
+Version: 1.0.3
 Authors@R: person("Will", "Hopper", email = "whopper@psych.umass.edu", role = c("aut", "cre"))
 Description: Implements the core model logic of pattern completion learning, as
     applied to the testing effect

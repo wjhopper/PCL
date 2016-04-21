@@ -31,10 +31,10 @@ A PCRparams object
 Title
 }
 \examples{
-param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05, Tmax = 75, Tmin = 0.5, lambda = .5)
-
-beta_timed <- initPCR(params = param_list, distribution = "beta", nItems = 20,
-                           nSims = 1000, nFeatures = 100, time = 10)
-
+param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05,
+                   Tmax = 75, Tmin = 0.5, lambda = .5)
+beta_timed <- initPCR(params = param_list, distribution = "beta", time = 10,
+                      nFeatures = 100, nSims = 1000, nItems = 20)
+str(beta_timed, give.attr=FALSE)
 }
 
