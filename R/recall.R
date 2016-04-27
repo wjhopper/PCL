@@ -31,8 +31,10 @@ cuedRecall.PCR <- function(x, cue = 1, ...) {
 #' and item thresholds based on the outcome of the test.
 #' @export
 cuedRecall.default <- function(x, cue = 1, test_num = 1, increment  = TRUE) {
+  if ('space' %in% names(x$params) && x$params$space >= 0) {
+    x <- space_out(x, cue, test_num = test_num)
+  }
 
-  x <- space_out(x, cue, test_num = test_num)
   if (increment) {
     feature_updates <- x$PRlearning(x$activations[,,cue][x$recalled[[cue]][,,test_num]])
     x$activations[,,cue][x$recalled[[cue]][,,test_num]] <- feature_updates
@@ -45,11 +47,9 @@ cuedRecall.default <- function(x, cue = 1, test_num = 1, increment  = TRUE) {
 }
 
 space_out <- function(x, cue = 1, test_num = 1) {
-  if ('space' %in% names(x$params) && x$params$space >= 0) {
-    # recalled items stay the same with probability 1-space out
-    not_spaced <- as.logical(rbinom(sum(x$recalled[[cue]][,,test_num]), 1, 1-x$params$space))
-    x$recalled[[cue]][,,test_num][x$recalled[[cue]][,,test_num]] <- not_spaced
-  }
+  # recalled items stay the same with probability 1-space out
+  not_spaced <- as.logical(rbinom(sum(x$recalled[[cue]][,,test_num]), 1, 1-x$params$space))
+  x$recalled[[cue]][,,test_num][x$recalled[[cue]][,,test_num]] <- not_spaced
   return(x)
 }
 
