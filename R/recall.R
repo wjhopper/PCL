@@ -36,10 +36,11 @@ cuedRecall.default <- function(x, cue = 1, test_num = 1, increment  = TRUE) {
   }
 
   if (increment) {
-    feature_updates <- x$PRlearning(x$activations[,,cue][x$recalled[[cue]][,,test_num]])
-    x$activations[,,cue][x$recalled[[cue]][,,test_num]] <- feature_updates
-    threshold_updates <-  x$CRlearning(x$thresholds[x$recalled[[cue]][,,test_num]])
-    x$thresholds[x$recalled[[cue]][,,test_num]] <- threshold_updates
+    r <- x$recalled[[cue]][,,test_num]
+    feature_updates <- x$PRlearning(x$activations[,,cue][r])
+    x$activations[,,cue][r] <- feature_updates
+    threshold_updates <-  x$CRlearning(x$thresholds[r])
+    x$thresholds[r] <- threshold_updates
     x <- record_practice(x, "test", cue)
   }
 
