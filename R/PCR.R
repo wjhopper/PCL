@@ -76,25 +76,30 @@ PRlearning_factory <- function(x) {
   max <- x$nFeatures
 
   if (x$distribution == 'beta') {
-
-    f <- function(activations, p = params$LR) {
+    f <- function(activations, p = params$LR, delta = FALSE) {
       to_go <- ceiling(max - activations)
-
       # binomial mean = np, binomial variance = np(1-p)
       # bernoulli mean = p, bernoulli variance = p(1-p)
       activation_params <- betaParams(mean = p, sd = sqrt(p/to_go))
       learned  <- rbeta(n = length(activations),
                         shape1 = activation_params$a,
                         shape2 = activation_params$b) * to_go
-      return(activations + learned)
+      if (delta) {
+        return(learned)
+      } else {
+        return(activations + learned)
+      }
     }
 
   } else {
-
-    f <- function(activations, p = params$LR) {
-      return(activations + rbinom(n = length(activations), size = max - activations, prob = p))
+    f <- function(activations, p = params$LR, delta = FALSE) {
+      learned <- rbinom(n = length(activations), size = max - activations, prob = p)
+      if (delta) {
+        return(learned)
+      } else {
+      return(activations + learned)
+      }
     }
-
   }
 
   return(f)
@@ -106,32 +111,35 @@ PRforgetting_factory <- function(x) {
   max <- x$nFeatures
 
   if (x$distribution == 'beta') {
-
-    f <- function(activations, p = params$FR) {
+    f <- function(activations, p = params$FR, delta = FALSE) {
       to_go <- ceiling(activations)
-
       # binomial mean = np, binomial variance = np(1-p)
       # bernoulli mean = p, bernoulli variance = p(1-p)
       activation_params <- betaParams(mean = p, sd = sqrt(p/to_go))
       forgot  <- rbeta(n = length(activations),
                        shape1 = activation_params$a,
                        shape2 = activation_params$b) * to_go
-      return(activations - forgot)
+      if (delta) {
+        return(-forgot)
+      } else {
+        return(activations - forgot)
+      }
     }
 
   } else {
-
-    f <- function(activations, p = params$FR) {
+    f <- function(activations, p = params$FR, delta = FALSE) {
       # rbinom(number of repetitions, number of binomial trials, probability of success)
       forgot <- rbinom(n = length(activations), size = activations, prob = p)
-      return(activations - forgot)
+      if (delta) {
+        return(-forgot)
+      } else {
+        return(activations - forgot)
+      }
     }
-
   }
 
   return(f)
 }
-
 
 CRlearning_factory <- function(x) {
 
@@ -139,25 +147,30 @@ CRlearning_factory <- function(x) {
   max <- x$nFeatures
 
   if (x$distribution == 'beta') {
-
-    f <- function(thresholds, p = params$TR) {
+    f <- function(thresholds, p = params$TR, delta = FALSE) {
       known <- ceiling(thresholds)
-
       # binomial mean = np, binomial variance = np(1-p)
       # bernoulli mean = p, bernoulli variance = p(1-p)
       thresh_params <- betaParams(mean = p, sd = sqrt((p*(1-p))/known))
-      lowered  <- rbeta(n = length(known),
-                        shape1 = thresh_params$a,
-                        shape2 = thresh_params$b) * known
-      return(thresholds - lowered)
+      reduction <- rbeta(n = length(known),
+                         shape1 = thresh_params$a,
+                         shape2 = thresh_params$b) * known
+      if (delta) {
+        return(-reduction)
+      } else {
+        return(thresholds - reduction)
+      }
     }
 
   } else {
-
-    f <- function(thresholds, p = params$TR) {
-      return(thresholds - rbinom(n = length(thresholds), size = thresholds, prob = p))
+    f <- function(thresholds, p = params$TR, delta = FALSE) {
+      reduction <- rbinom(n = length(thresholds), size = thresholds, prob = p)
+      if (delta) {
+        return(-reduction)
+      } else {
+        return(thresholds - reduction)
+      }
     }
-
   }
 
   return(f)
