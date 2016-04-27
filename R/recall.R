@@ -46,6 +46,22 @@ cuedRecall.default <- function(x, cue = 1, test_num = 1, increment  = TRUE) {
   return(x)
 }
 
+#' @export
+thresh_change <- function(x) {
+  # unneed represents the decrease in the number of features which must be activated in PR,
+  # making it easier to recall the item.
+  # Its value is a negative change, so it is added to the current thresholds values in
+  # order to *decrease* the threshold.
+  unneeded <- x$CRlearning(x$thresholds, p = x$params$TC, delta = TRUE)
+  # needed represents increase in the number of features which need to be
+  # activated in PR, making it more difficult to recall the item.
+  # It is a positive change, so its value is added to the curent thresholds in
+  # order to increase the threshold.
+  needed <- x$PRlearning(x$thresholds, p = x$params$TC, delta = TRUE)
+  x$thresholds <- x$thresholds + unneeded + needed
+  return(x)
+}
+
 space_out <- function(x, cue = 1, test_num = 1) {
   # recalled items stay the same with probability 1-space out
   not_spaced <- as.logical(rbinom(sum(x$recalled[[cue]][,,test_num]), 1, 1-x$params$space))

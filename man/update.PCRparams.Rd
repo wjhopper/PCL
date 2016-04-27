@@ -14,7 +14,7 @@ param_list <- list(ER=.6, LR=.15, FR=.1, TR=.1, TV = .05,
                    Tmax = 75, Tmin = 0.5, lambda = .5)
 beta_timed <- initPCR(params = param_list, distribution = "beta", time = 10,
                       nFeatures = 100, nSims = 1000, nItems = 20)
-new <- updatePCR(beta_timed, new = list(ER = .1, LR = .75))
+new <- update(beta_timed, new = list(ER = .1, LR = .75))
 print(new$params)
 }
 
