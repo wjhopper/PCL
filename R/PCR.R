@@ -31,10 +31,8 @@ initPCR <- function(params, distribution = "beta", time = 0,
   unevaluated <- sapply(x, is.name)
   x[unevaluated] <- lapply(x[unevaluated], eval)
 
-  x$PRlearning <- PRlearning_factory(x)
-  x$CRlearning <- CRlearning_factory(x)
-  x$PRforgetting <- PRforgetting_factory(x)
-
+  # Add the learning/forgetting functions to the object as closures
+  x <- c(x, learning_factory(x))
   class(x) <- "PCRparams"
   return(x)
 }
@@ -57,10 +55,9 @@ update.PCRparams <- function(x, new) {
   }
   x$params[names(new)] <- new
 
-  # Update the PR and CR learning methods to enclose the new parameter values
-  x$PRlearning <- PRlearning_factory(x)
-  x$CRlearning <- CRlearning_factory(x)
-  x$PRforgetting <- PRforgetting_factory(x)
+  # Update the learning and forgetting function to enclose the new parameter values
+  learning_env <- environment(x$PRlearning)
+  learning_env$params <- x$params
 
   return(x)
 }
@@ -70,16 +67,18 @@ record_practice <- function(x, method, cue) {
   return(x)
 }
 
-PRlearning_factory <- function(x) {
-
+learning_factory <- function(x) {
   params <- x$params
   max <- x$nFeatures
 
   if (x$distribution == 'beta') {
-    f <- function(activations, p = params$LR, delta = FALSE) {
+    # binomial mean = np, binomial variance = np(1-p)
+    # bernoulli mean = p, bernoulli variance = p(1-p)
+
+    ## Beta Primary Retrieval Learning function
+    PRlearning <- function(activations, p = params$LR, delta = FALSE) {
       to_go <- ceiling(max - activations)
-      # binomial mean = np, binomial variance = np(1-p)
-      # bernoulli mean = p, bernoulli variance = p(1-p)
+
       activation_params <- betaParams(mean = p, sd = sqrt(p/to_go))
       learned  <- rbeta(n = length(activations),
                         shape1 = activation_params$a,
@@ -91,30 +90,9 @@ PRlearning_factory <- function(x) {
       }
     }
 
-  } else {
-    f <- function(activations, p = params$LR, delta = FALSE) {
-      learned <- rbinom(n = length(activations), size = max - activations, prob = p)
-      if (delta) {
-        return(learned)
-      } else {
-      return(activations + learned)
-      }
-    }
-  }
-
-  return(f)
-}
-
-PRforgetting_factory <- function(x) {
-
-  params <- x$params
-  max <- x$nFeatures
-
-  if (x$distribution == 'beta') {
-    f <- function(activations, p = params$FR, delta = FALSE) {
+    ## Beta Primary Retrieval Forgetting function
+    PRforgetting <- function(activations, p = params$FR, delta = FALSE) {
       to_go <- ceiling(activations)
-      # binomial mean = np, binomial variance = np(1-p)
-      # bernoulli mean = p, bernoulli variance = p(1-p)
       activation_params <- betaParams(mean = p, sd = sqrt(p/to_go))
       forgot  <- rbeta(n = length(activations),
                        shape1 = activation_params$a,
@@ -126,28 +104,8 @@ PRforgetting_factory <- function(x) {
       }
     }
 
-  } else {
-    f <- function(activations, p = params$FR, delta = FALSE) {
-      # rbinom(number of repetitions, number of binomial trials, probability of success)
-      forgot <- rbinom(n = length(activations), size = activations, prob = p)
-      if (delta) {
-        return(-forgot)
-      } else {
-        return(activations - forgot)
-      }
-    }
-  }
-
-  return(f)
-}
-
-CRlearning_factory <- function(x) {
-
-  params <- x$params
-  max <- x$nFeatures
-
-  if (x$distribution == 'beta') {
-    f <- function(thresholds, p = params$TR, delta = FALSE) {
+    ## Beta Convergent Retrieval Learning Function
+    CRlearning <- function(thresholds, p = params$TR, delta = FALSE) {
       known <- ceiling(thresholds)
       # binomial mean = np, binomial variance = np(1-p)
       # bernoulli mean = p, bernoulli variance = p(1-p)
@@ -163,7 +121,29 @@ CRlearning_factory <- function(x) {
     }
 
   } else {
-    f <- function(thresholds, p = params$TR, delta = FALSE) {
+    ## Binomial Primary Retrieval Learning function
+    PRlearning <- function(activations, p = params$LR, delta = FALSE) {
+      learned <- rbinom(n = length(activations), size = max - activations, prob = p)
+      if (delta) {
+        return(learned)
+      } else {
+        return(activations + learned)
+      }
+    }
+
+    ## Binomial Primary Retrieval Forgetting function
+    PRforgetting <- function(activations, p = params$FR, delta = FALSE) {
+      # rbinom(number of repetitions, number of binomial trials, probability of success)
+      forgot <- rbinom(n = length(activations), size = activations, prob = p)
+      if (delta) {
+        return(-forgot)
+      } else {
+        return(activations - forgot)
+      }
+    }
+
+    ## Binomial Convergen Retrieval Learning Function
+    CRlearning <- function(thresholds, p = params$TR, delta = FALSE) {
       reduction <- rbinom(n = length(thresholds), size = thresholds, prob = p)
       if (delta) {
         return(-reduction)
@@ -173,8 +153,11 @@ CRlearning_factory <- function(x) {
     }
   }
 
-  return(f)
+  return(list("PRlearning" = PRlearning, "PRforgetting" = PRforgetting,
+              "CRlearning" = CRlearning))
 }
+
+
 
 #' Summarize a PCR model condition
 #'
