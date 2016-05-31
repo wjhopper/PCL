@@ -37,10 +37,8 @@ study.PCRparams <- function(x, nCues = 1, tests_per_cue = 1, ...) {
   recalled <- setNames(lapply(1:nCues, create_recalled_array),
                        paste0("Cue",1:nCues))
 
-  object <- c(list(activations = mems, thresholds = thresh, recalled = recalled,
-                   practice = setNames(rep(list(NULL), nCues), paste0("Cue",1:nCues))),
-              x)
-
+  object <- c(list(activations = mems, thresholds = thresh, recalled = recalled), x)
+  object <- record_practice(object, cue = 1:nCues, method = "study")
   if (x$time > 0) {
     object$RT <- object$recalled
   }
@@ -54,7 +52,7 @@ study.PCRparams <- function(x, nCues = 1, tests_per_cue = 1, ...) {
 #' @export
 study.PCR<- function(x, cue = 1, ...) {
   x$activations[,,cue] <- x$PRlearning(x$activations[,,cue], p = x$params$LR)
-  x <- record_practice(x, "study", cue)
+  x <- record_practice(x, cue, "study")
   return(x)
 }
 

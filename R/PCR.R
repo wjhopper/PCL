@@ -31,6 +31,10 @@ initPCR <- function(params, distribution = "beta", time = 0,
   unevaluated <- sapply(x, is.name)
   x[unevaluated] <- lapply(x[unevaluated], eval)
 
+  # The history data frame is the record of which cues were practiced,
+  # how they were practiced, and in which order
+  x$history = data.frame(cue = NULL, trial_type = NULL, stringsAsFactors = FALSE)
+
   # Add the learning/forgetting functions to the object as closures
   x <- c(x, learning_factory(x))
   class(x) <- "PCRparams"
@@ -62,8 +66,9 @@ update.PCRparams <- function(x, new) {
   return(x)
 }
 
-record_practice <- function(x, method, cue) {
-  x$practice[[cue]] <- c(x$practice[[cue]], method)
+record_practice <- function(x, cue, method) {
+  x$history <- rbind(x$history,
+                     data.frame(cue = cue, trial_type = method, stringsAsFactors = FALSE))
   return(x)
 }
 
@@ -181,14 +186,21 @@ learning_factory <- function(x) {
 #' restudy <- summary(beta_t_restudied)
 summary.PCR <- function(x) {
 
-  x$practice <- lapply(x$practice, function(x) ifelse(is.null(x), "none", x))
   nCues <- dim(x$activations)[3]
   IV <- lapply(1:nCues, cue_summary, x)
   return(do.call(rbind, IV))
 }
 
 cue_summary <- function(cue, x) {
-  if (!is.na(x$recalled[cue])) {
+  p <- which(x$history$cue == cue)
+  if (length(p) == 1) {
+    x$history$trial_type[p] <- "none"
+  } else {
+    x$history <- x$history[-p[1], ]
+  }
+  x$history <-`rownames<-`(x$history, NULL)
+
+  if (!all(is.na(x$recalled[[cue]]))) {
     nTests <- dim(x$recalled[[cue]])[3]
     recalled <- apply(x$recalled[[cue]], 3, as.vector)
     recalled <- lapply(seq_len(ncol(recalled)), function(i) recalled[,i])
@@ -201,19 +213,26 @@ cue_summary <- function(cue, x) {
                                    sapply(incorrect_RT, median)),
                                  byrow = TRUE, ncol = 2))
     rawRTs <- c(correct_RT, incorrect_RT)
-    IV <- tbl_df(data.frame(cue, practice = x$practice[[cue]],
-                            test = rep(1:nTests, each = length(accuracy)/nTests),
-                            accuracy =rep(c(1,0), times = nTests),
-                            proportion = accuracy,
-                            medianRT = medianRT,
-                            row.names = NULL, stringsAsFactors = FALSE))
+    IV <- data.frame(setNames(x$history[x$history$cue==cue, ], c("cue","practice")),
+                     test = rep(1:nTests, each = length(accuracy)/nTests),
+                     accuracy =rep(c(1,0), times = nTests),
+                     proportion = accuracy,
+                     medianRT = medianRT,
+                     stringsAsFactors = FALSE,
+                     row.names = NULL)
 
     if (length(rawRTs) > 2) {
-      IV$rawRTs <- rawRTs[order(c(seq_along(correct_RT), seq_along(incorrect_RT)))]
+      IV$RTs <- rawRTs[order(c(seq_along(correct_RT), seq_along(incorrect_RT)))]
     } else {
-      IV$rawRTs <- rawRTs
+      IV$RTs <- rawRTs
     }
 
-    return(IV)
+  } else {
+    IV <- data.frame(setNames(x$history[x$history$cue==cue, ], c("cue","practice")),
+                     test=NA,  accuracy=NA, proportion = NA, medianRT = NA, RTs = NA,
+                     stringsAsFactors = FALSE, row.names = NULL)
   }
+
+ return(tbl_df(IV))
+
 }

@@ -41,7 +41,7 @@ cuedRecall.default <- function(x, cue = 1, test_num = 1, increment  = TRUE) {
     x$activations[,,cue][r] <- feature_updates
     threshold_updates <-  x$CRlearning(x$thresholds[r])
     x$thresholds[r] <- threshold_updates
-    x <- record_practice(x, "test", cue)
+    x <- record_practice(x, cue, "test")
   }
 
   return(x)
