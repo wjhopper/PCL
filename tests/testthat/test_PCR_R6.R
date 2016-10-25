@@ -51,8 +51,13 @@ test_that("Testing $cuedRecall Method", {
   updated_thresholds <- thresholds[corrects] - rbinom(sum(corrects),
                                                       thresholds[corrects],
                                                       .1)
+  updated_strengths <- strengths[corrects] + rbinom(length(strengths),
+                                                    100 - strengths,
+                                                    .15)[corrects]
   expect_equal(mean(corrects), mean(x$recalled[[1]][,,1]))
   expect_equal(x$CR_thresholds[x$recalled[[1]][,,1]], updated_thresholds)
   expect_equal(x$CR_thresholds[!x$recalled[[1]][,,1]], thresholds[!corrects])
+  expect_equal(x$PR_strengths[[1]][x$recalled[[1]][,,1]], updated_strengths)
+  expect_equal(x$PR_strengths[[1]][!x$recalled[[1]][,,1]], strengths[!corrects])
 })
 

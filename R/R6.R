@@ -96,17 +96,25 @@ PCR <- R6Class("PCR",
 
                  },
 
-                 cuedRecall = function(cue) {
+                 cuedRecall = function(cue, increment = TRUE) {
 
+                   # Keep track of what test we're on for this cue
                    test_number <- private$tests_taken[[cue]] + 1
+                   # Which items are recallable?
                    self$recalled[[cue]][,,test_number] <- self$PR_strengths[[cue]] > self$CR_thresholds
                    correct_index <- which(self$recalled[[cue]][,,test_number])
-                   self$CR_thresholds[correct_index] <- self$CR_thresholds[correct_index] -
-                     private$CR_learning(corrects = correct_index,
-                                         p = value(self$TR))
+
+                   if (increment) {
+                     self$CR_thresholds[correct_index] <- self$CR_thresholds[correct_index] -
+                       private$CR_learning(corrects = correct_index,
+                                           p = value(self$TR))
+                     self$PR_strengths[[cue]][correct_index] <- self$PR_strengths[[cue]][correct_index] +
+                       private$PR_learning(cue = cue, p = value(self$LR))[correct_index]
+
+                   }
+
                    private$tests_taken[[cue]] <- test_number
                    invisible(self)
-
                  },
 
                  freeRecall = function(cue) {}),
