@@ -13,6 +13,7 @@ PCR <- R6Class("PCR",
                  PR_strengths = NULL,
                  CR_thresholds = NULL,
                  recalled = NULL,
+                 recall_order = NULL,
                  initialize = function(ER = .5, LR = .15, TR = .1, FR = .1,
                                        nSim = 1000, nItems = 15, nFeatures = 100,
                                        tests_per_cue = list(one = 1)) {
@@ -42,14 +43,16 @@ PCR <- R6Class("PCR",
 
                    # Initialize Recall Outcomes Arrays
                    self$recalled <- lapply(tests_per_cue,
-                                           function(cue) {
-                                             if (cue > 0) {
-                                               element <- array(dim = c(nSim, nItems, tests_per_cue[cue]))
+                                           function(tests) {
+                                             if (tests > 0) {
+                                               element <- array(dim = c(nSim, nItems, tests))
                                              } else {
                                                element <- NULL
                                              }
                                              return(element)
                                            })
+
+                   self$recall_order <- self$recalled
 
                    private$tests_taken <- lapply(tests_per_cue, function(...) 0)
 
@@ -100,21 +103,22 @@ PCR <- R6Class("PCR",
 
                    # Keep track of what test we're on for this cue
                    test_number <- private$tests_taken[[cue]] + 1
-                   # Which items are recallable?
-                   self$recalled[[cue]][,,test_number] <- self$PR_strengths[[cue]] > self$CR_thresholds
-                   correct_index <- which(self$recalled[[cue]][,,test_number])
+                   # Record which items are recallable
+                   private$score_corrects(cue, test_number)
+
+                   # Record the correct output order
+                   for (i in 1:self$nSim) {
+                     x <- self$recalled[[cue]][i,,test_number]
+                     self$recall_order[[cue]][i,x,test_number] <- 1:sum(x)
+                   }
 
                    if (increment) {
-                     self$CR_thresholds[correct_index] <- self$CR_thresholds[correct_index] -
-                       private$CR_learning(corrects = correct_index,
-                                           p = value(self$TR))
-                     self$PR_strengths[[cue]][correct_index] <- self$PR_strengths[[cue]][correct_index] +
-                       private$PR_learning(cue = cue, p = value(self$LR))[correct_index]
-
+                     private$testing_increments(cue)
                    }
 
                    private$tests_taken[[cue]] <- test_number
                    invisible(self)
+
                  },
 
                  freeRecall = function(cue) {}),
@@ -149,6 +153,31 @@ PCR <- R6Class("PCR",
                    thresholds <- self$CR_thresholds -
                      private$CR_learning(matrix(TRUE, self$nSim, self$nItems),
                                          p = .5)
+                 },
+
+                 testing_increments = function(cue, test_number) {
+
+                   # corrects is an index into the item/list matrices
+                   # which tells you the linear position of the recalled items
+                   corrects <- private$find_corrects(cue, test_number)
+
+                   self$CR_thresholds[corrects] <- self$CR_thresholds[corrects] -
+                     private$CR_learning(corrects = corrects,
+                                         p = value(self$TR))
+                   self$PR_strengths[[cue]][corrects] <- self$PR_strengths[[cue]][corrects] +
+                     private$PR_learning(cue = cue, p = value(self$LR))[corrects]
+                 },
+
+                 score_corrects = function(cue, test_number) {
+
+                   self$recalled[[cue]][,,test_number] <- self$PR_strengths[[cue]] > self$CR_thresholds
+
+                 },
+
+                 find_corrects = function(cue, test_number) {
+
+                   correct_index <- which(self$recalled[[cue]][,,test_number])
+                   return(correct_index)
                  }
                 )
 )
