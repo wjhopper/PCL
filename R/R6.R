@@ -121,7 +121,50 @@ PCR <- R6Class("PCR",
 
                  },
 
-                 freeRecall = function(cue) {}),
+                 freeRecall = function(cue, increment = TRUE) {
+
+
+                   # Keep track of what test we're on for this cue
+                   test_number <- private$tests_taken[[cue]] + 1
+                   # Record which items are recallable
+                   private$score_corrects(cue, test_number)
+
+                   # Record the correct output order
+                   for (i in 1:self$nSim) {
+                     # Subset out a logical vector reporting whether each individual item
+                     # was recalled (TRUE) or not recalled (FALSE). This vector is in
+                     # simulation order
+                     corrects <- self$recalled[[cue]][i,,test_number]
+
+                     # Subset out a numeric vector reporting the position of memory stregnths,
+                     # sort from largest to smallest. The first element in retrieval_order gives
+                     # the *position* of the element with the largest PR activation, the second
+                     # element gives the *position* of the element with the second
+                     # largest PR activation, etc.
+                     retrieval_order <- order(self$PR_strengths[[cue]][i,],
+                                           decreasing = TRUE)
+
+                     # Use the retrieval_order vector to sort the corrects vector from simulation
+                     # order into retrieval order. So now the corrects vector tells you whether or not
+                     # the first retrieval attempt was successful, whether or not the second
+                     # retrieval attempt was successful, etc.
+                     corrects <- corrects[retrieval_order]
+
+                     # Subset the retrieval_order vector with the corrects vector,
+                     # so as to fill in only elements in positions of retrieved items
+                     # with an output order
+                     self$recall_order[[cue]][i, retrieval_order[corrects], test_number] <- 1:sum(corrects)
+                    }
+
+                   # Incrementing memory strengths must be done after determining recall order,
+                   # because the order of recall depends on the memory strengths. If it is done before,
+                   # the rank order of memory strengths will not be the same as when accuracy was checked
+                   if (increment) {
+                     private$testing_increments(cue)
+                   }
+
+                   private$tests_taken[[cue]] <- test_number
+                 }),
 
                private = list(
 
