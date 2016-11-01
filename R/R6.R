@@ -58,14 +58,6 @@ PCR <- R6Class("PCR",
 
                  },
 
-                 toGo = function(cue) {
-                   return(self$nFeatures - self$PR_strengths[[cue]])
-                 },
-
-                 above = function() {
-                   return(self$CR_thresholds)
-                 },
-
                  study = function(cue) {
 
                    # Calls PR_learning method with probability parameter ER
@@ -170,16 +162,24 @@ PCR <- R6Class("PCR",
 
                  tests_taken = NULL,
 
+                 toGo = function(cue) {
+                   return(self$nFeatures - self$PR_strengths[[cue]])
+                 },
+
+                 distance_above = function() {
+                   return(self$CR_thresholds)
+                 },
+
                  PR_learning = function(cue, p) {
                    learned <- rbinom(n = length(self$PR_strengths[[cue]]),
-                                     size = self$toGo(cue),
+                                     size = private$toGo(cue),
                                      prob = p)
                    return(learned)
                  },
 
                  CR_learning = function(corrects, p) {
                    lowered <- rbinom(n = length(corrects),
-                                     size = self$above()[corrects],
+                                     size = private$distance_above()[corrects],
                                      prob = p)
                    return(lowered)
                  },
