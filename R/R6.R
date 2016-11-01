@@ -211,9 +211,15 @@ PCR <- R6Class("PCR",
                      private$PR_learning(cue = cue, p = value(self$LR))[corrects]
                  },
 
+                 above_threshold = function(cue) {
+
+                   return(self$PR_strengths[[cue]] >= self$CR_thresholds)
+
+                 },
+
                  score_corrects = function(cue, test_number) {
 
-                   self$recalled[[cue]][,,test_number] <- self$PR_strengths[[cue]] > self$CR_thresholds
+                   self$recalled[[cue]][,,test_number] <- private$above_threshold(cue)
 
                  },
 
@@ -222,5 +228,114 @@ PCR <- R6Class("PCR",
                    correct_index <- which(self$recalled[[cue]][,,test_number])
                    return(correct_index)
                  }
+                )
+)
+
+
+PCRt <- R6Class("PCRt",
+                inherit = PCR,
+                public = list(
+                  Tmin = NULL,
+                  Tmax = NULL,
+                  lambda = NULL,
+                  Time = NULL,
+                  RT = NULL,
+                  initialize = function(Tmin = 1, Tmax = 30, lambda = 1, Time = 90, ...) {
+
+                    self$Time <- Time
+
+                    self$Tmin <- new("parameter", value = Tmin, name = "min_RT",
+                                     upper_bound = Tmax, lower_bound = 0)
+                    self$Tmax <- new("parameter", value = Tmax, name = "max_RT",
+                                   upper_bound = self$Time, lower_bound = Tmin)
+                    self$lambda <- new("parameter", value = lambda, name = "threshold_reduction",
+                                   upper_bound = Inf, lower_bound = 0)
+
+                    super$initialize(...)
+
+                    self$RT <- self$recalled
+                  },
+
+                  cuedRecall = function(cue, increment = TRUE) {
+
+                    test_number <- private$tests_taken[[cue]] + 1
+                    private$calculate_RT(cue, test_number)
+                    super$cuedRecall(cue, increment)
+                    r <- self$recalled[[cue]][,,test_number]
+                    self$RT[[cue]][[,,test_number]][r] <- NA
+                  },
+
+                  freeRecall = function(cue, increment = TRUE) {
+
+                    # Keep track of what test we're on for this cue
+                    test_number <- private$tests_taken[[cue]] + 1
+
+                    private$calculate_RT(cue, test_number)
+
+                    recallable <- private$above_threshold(cue)
+
+                    all_lists_retrieval_orders <- t(apply(self$PR_strengths[[cue]], 1, order,
+                                                          decreasing = TRUE))
+
+                    # Record the correct output order
+                    for (i in 1:self$nSim) {#
+
+                      # Subset out a numeric vector reporting the position of memory stregnths,
+                      # sort from largest to smallest. The first element in retrieval_order gives
+                      # the *position* of the element with the largest PR activation, the second
+                      # element gives the *position* of the element with the second
+                      # largest PR activation, etc.
+                      retrieval_order <- all_lists_retrieval_orders[i,]
+
+                      # Use the retrieval_order vector to sort the RT vector for the current list
+                      # from simulation order into retrieval order.
+                      RTs <- cumsum(self$RT[[cue]][i, retrieval_order, test_number])
+
+                      # Determine which items were recalled by considering if they were above threshold,
+                      # and if the cummulative RT at the point of recall is less than the total alloted
+                      # time for the recall episode
+                      corrects <- recallable[i, retrieval_order] &  RTs <= self$Time
+
+                      # Insert the logical vector into the correct row of the $recalled field arrays
+                      # Importantly, it must be inserted in simulation order
+                      self$recalled[[cue]][i, retrieval_order, test_number] <- corrects
+
+                      # Subset the retrieval_order vector with the corrects vector,
+                      # so as to fill in only elements in positions of retrieved items
+                      # with an output order
+
+                      self$RT[[cue]][i, retrieval_order[corrects], test_number] <- c(RTs[1],
+                                                                                     diff(RTs[corrects]))
+                      self$RT[[cue]][i, retrieval_order[!corrects], test_number] <- NA
+                      self$recall_order[[cue]][i, retrieval_order[corrects], test_number] <- 1:sum(corrects)
+                    }
+
+                    # Incrementing memory strengths must be done after determining recall order,
+                    # because the order of recall depends on the memory strengths. If it is done before,
+                    # the rank order of memory strengths will not be the same as when accuracy was checked
+                    if (increment) {
+                      private$testing_increments(cue)
+                    }
+
+                    private$tests_taken[[cue]] <- test_number
+                  }
+                ),
+
+                private = list(
+
+                  calculate_RT = function(cue, test_number) {
+
+                    self$RT[[cue]][,,test_number] <- value(self$Tmin) + (value(self$Tmax)-value(self$Tmin)) *
+                      exp(-value(self$lambda) * abs(self$PR_strengths[[cue]]-self$CR_thresholds))
+
+                  },
+
+                  score_corrrects = function(cue, test_number) {
+
+                    self$recalled[[cue]][,,test_number] <- private$above_threshold(cue) &
+                      self$RT[[cue]] <= self$Time
+
+}
+
                 )
 )

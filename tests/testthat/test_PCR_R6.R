@@ -1,8 +1,14 @@
 context("Testing the PCR R6 class")
 
-x <- PCR$new(ER = .5, LR = .15, TR = .1, FR = .1,
+y <- PCR$new(ER = .5, LR = .15, TR = .1, FR = .1,
              nSim = 1000, nItems = 15, nFeatures = 100,
              tests_per_cue = list(one = 1, two = 1))
+x <- y$clone()
+
+t <- PCRt$new(ER = .5, LR = .15, TR = .1, FR = .1,
+              Tmin = 1, Tmax = 30, lambda = 1, Time = 90,
+              nSim = 1000, nItems = 15, nFeatures = 100,
+              tests_per_cue = list(one = 1, two = 1))
 
 test_that("Testing PCR Object Creation", {
   # Primary Retrieval Activations
@@ -42,7 +48,7 @@ test_that("Testing $restudy Method", {
 test_that("Testing $cuedRecall Method", {
   strengths <- x$PR_strengths[[1]]
   thresholds <- x$CR_thresholds
-  corrects <-  strengths > thresholds
+  corrects <-  strengths >= thresholds
   set.seed(919)
   x$cuedRecall(cue = 1)
   expect_lte(max(x$CR_thresholds), 100)
@@ -61,3 +67,9 @@ test_that("Testing $cuedRecall Method", {
   expect_equal(x$PR_strengths[[1]][!x$recalled[[1]][,,1]], strengths[!corrects])
 })
 
+test_that("Testing timed $freeRecall method", {
+  t$study(1)$freeRecall(1)
+  nRecalled_per_list <- apply(t$recalled[[1]][,,1], 1, sum)
+  nMissing_RTs_per_list <- apply(t$RT[[1]][,,1], 1, function(x) sum(!is.na(x)))
+  expect_equal(nRecalled_per_list, nMissing_RTs_per_list)
+})
