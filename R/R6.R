@@ -304,7 +304,7 @@ PCRt <- R6Class("PCRt",
                       # so as to fill in only elements in positions of retrieved items
                       # with an output order
 
-                      self$RT[[cue]][i, retrieval_order[corrects], test_number] <- c(RTs[1],
+                      self$RT[[cue]][i, retrieval_order[corrects], test_number] <- c(RTs[corrects[1]],
                                                                                      diff(RTs[corrects]))
                       self$RT[[cue]][i, retrieval_order[!corrects], test_number] <- NA
                       self$recall_order[[cue]][i, retrieval_order[corrects], test_number] <- 1:sum(corrects)
