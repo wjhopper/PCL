@@ -38,7 +38,7 @@ PCR <- R6Class("PCR",
                    self$PR_strengths <- replicate(length(tests_per_cue),
                                                   matrix(0L, nSim, nItems),
                                                   simplify = FALSE)
-                   self$PR_strengths <- setNames(self$PR_strengths, nm = names(tests_per_cue))
+                   names(self$PR_strengths) <- names(tests_per_cue)
 
                    self$CR_thresholds <- private$initialize_thresholds()
 
