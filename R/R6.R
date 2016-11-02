@@ -1,5 +1,6 @@
 #' @import R6
 #' @import parameters
+#' @importFrom whoppeR betaParams
 #' @export
 PCR <- R6Class("PCR",
                public = list(
@@ -339,3 +340,60 @@ PCRt <- R6Class("PCRt",
 
                 )
 )
+
+
+PCRbeta <- R6Class("PCRbeta",
+                   inherit = PCRt,
+                   public = list(
+
+                     TRvar = NULL,
+
+                     initialize = function(TRvar = .25, ...) {
+
+                       self$TRvar <- new("parameter",
+                                         value = TRvar, name = "thresh_variance",
+                                         upper_bound = .25, lower_bound = 1/1e10)
+                       super$initialize(...)
+                     },
+
+                     study = function(cue) {
+
+                       ER <- self$ER@value
+                       encoding_rate_params <- betaParams(mean = ER,
+                                                          sd = sqrt((ER*(1-ER))/self$nFeatures))
+                       strengths <- self$nFeatures * rbeta(n = length(self$PR_strengths[[cue]]),
+                                                           shape1 = encoding_rate_params$a,
+                                                           shape2 = encoding_rate_params$b)
+
+                       self$PR_strengths[[cue]] <- matrix(strengths,
+                                                          nrow = self$nSim,
+                                                          ncol = self$nItems)
+                       invisible(self)
+                     }
+                   ),
+
+                   private = list(
+
+                     toGo = function(cue) {
+                       self$nFeatures - ceiling(self$PR_strengths[[cue]])
+                     },
+
+                     distance_above = function() {
+                       floor(self$CR_thresholds)
+                     },
+
+                     initialize_thresholds = function() {
+
+                       variance <- self$TRvar@value
+                       threshold_dist_params <- betaParams(mean = .5,
+                                                           sd = sqrt((variance*(1-variance))/self$nFeatures))
+                       thresholds <- self$nFeatures * rbeta(n = self$nItems * self$nSim,
+                                                            shape1 = threshold_dist_params$a,
+                                                            shape2 = threshold_dist_params$b)
+                       matrix(thresholds,
+                              nrow = self$nSim,
+                              ncol = self$nItems)
+                     }
+                     )
+
+                  )
