@@ -157,6 +157,21 @@ PCR <- R6Class("PCR",
                    }
 
                    private$tests_taken[[cue]] <- test_number
+                 },
+
+                 update_parameters = function(parameter_list) {
+
+                   if (!all(names(parameter_list) %in% names(self))) {
+
+                     stop(paste("Attempted to set unknown parameter(s):",
+                                paste(setdiff(names(parameter_list), names(self)),
+                                      collapse = ", ")))
+                   }
+
+                   Map(function(p_name, new_value) value(self[[p_name]]) <- new_value,
+                       names(parameter_list),
+                       parameter_list)
+
                  }),
 
                private = list(

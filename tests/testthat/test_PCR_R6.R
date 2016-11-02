@@ -73,3 +73,12 @@ test_that("Testing timed $freeRecall method", {
   nMissing_RTs_per_list <- apply(t$RT[[1]][,,1], 1, function(x) sum(!is.na(x)))
   expect_equal(nRecalled_per_list, nMissing_RTs_per_list)
 })
+
+test_that("Testing parameter updating method", {
+  t$update_parameters(list(LR=.25, FR=.75))
+  expect_equivalent(value(t$LR), .25) # LR should be changed from initial value
+  expect_equivalent(value(t$FR), .75) # FR should be changed from initial value
+  expect_equivalent(value(t$Tmax), 30) # Tmax should not be changed from initial value
+  expect_error(t$update_parameters(list(ER=-1))) # Should fail because encoding rate must be positive
+  expect_error(t$update_parameters(list(herp = 10))) # Should fail because PCR does not have a "herp" field
+})
