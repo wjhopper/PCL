@@ -258,6 +258,8 @@ PCRt <- R6Class("PCRt",
                   RT = NULL,
                   initialize = function(Tmin = 1, Tmax = 30, lambda = 1, Time = 90, ...) {
 
+                    stopifnot(Tmax > Tmin)
+
                     self$Time <- Time
 
                     self$Tmin <- new("parameter", value = Tmin, name = "min_RT",
