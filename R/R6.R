@@ -262,7 +262,7 @@ PCRt <- R6Class("PCRt",
                     private$calculate_RT(cue, test_number)
                     super$cuedRecall(cue, increment)
                     r <- self$recalled[[cue]][,,test_number]
-                    self$RT[[cue]][[,,test_number]][r] <- NA
+                    self$RT[[cue]][,,test_number][r] <- NA
                   },
 
                   freeRecall = function(cue, increment = TRUE) {
