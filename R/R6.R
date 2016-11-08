@@ -112,7 +112,7 @@ PCR <- R6Class("PCR",
                    }
 
                    if (increment) {
-                     private$testing_increments(cue)
+                     private$testing_increments(cue, test_number)
                    }
 
                    private$tests_taken[[cue]] <- test_number
