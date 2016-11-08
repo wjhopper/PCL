@@ -433,3 +433,34 @@ PCRbeta <- R6Class("PCRbeta",
                      )
 
                   )
+
+#' Number Recalled
+#'
+#' @param object An R object
+#' @param ... Arguments passed to other methods
+#'
+#' @export
+N_Recalled <- function(object, ...) {
+  UseMethod("N_Recalled")
+}
+
+#' @importFrom tidyr gather_
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr mutate
+#' @importFrom readr parse_number
+#' @importFrom magrittr %>%
+N_Recalled.PCR <- function(object) {
+
+  x <- lapply(X = object$recalled, FUN = apply, 3, rowSums) %>%
+    lapply(FUN = function(x) {
+      gather_(as_tibble(x), key_col="test", value_col="N_Recalled",
+            gather_cols = colnames(x)
+            )
+    }) %>%
+    bind_rows(.id="cue") %>%
+    mutate(test = parse_number(test),
+           proportion = N_Recalled/object$nItems)
+  x
+
+}
