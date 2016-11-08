@@ -74,6 +74,17 @@ test_that("Testing timed $freeRecall method", {
   expect_equal(nRecalled_per_list, nMissing_RTs_per_list)
 })
 
+test_that("Practice History is correctly recorded", {
+  expect_equal(x$history,
+               data.frame(cue = c(1,1,1),
+                          type = c("study","study","test"))
+  )
+  expect_equal(t$history,
+               data.frame(cue = c(1,1),
+                          type = c("study","test"))
+  )
+})
+
 test_that("Testing parameter updating method", {
   t$update_parameters(list(LR=.25, FR=.75))
   expect_equivalent(value(t$LR), .25) # LR should be changed from initial value

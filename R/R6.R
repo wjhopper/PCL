@@ -15,6 +15,7 @@ PCR <- R6Class("PCR",
                  CR_thresholds = NULL,
                  recalled = NULL,
                  recall_order = NULL,
+                 history = NULL,
                  initialize = function(ER = .5, LR = .15, TR = .1, FR = .1,
                                        nSim = 1000, nItems = 15, nFeatures = 100,
                                        tests_per_cue = list(one = 1)) {
@@ -57,6 +58,7 @@ PCR <- R6Class("PCR",
 
                    private$tests_taken <- lapply(tests_per_cue, function(...) 0)
 
+                   self$history <- data.frame(cue=numeric(0), type=character(0))
                  },
 
                  study = function(cue) {
@@ -66,6 +68,8 @@ PCR <- R6Class("PCR",
                    # for each item associated with the given cue
                    self$PR_strengths[[cue]] <- private$study_general(cue = cue,
                                                                      probability = self$ER@value)
+                   self$history <- rbind(self$history,
+                                         data.frame(cue=cue, type = "study"))
                    invisible(self)
 
                  },
@@ -77,6 +81,8 @@ PCR <- R6Class("PCR",
                    # for each item associated with the given cue
                    self$PR_strengths[[cue]] <- private$study_general(cue = cue,
                                                                      probability = self$LR@value)
+                   self$history <- rbind(self$history,
+                                         data.frame(cue=cue, type = "study"))
                    invisible(self)
 
                  },
@@ -110,6 +116,8 @@ PCR <- R6Class("PCR",
                    }
 
                    private$tests_taken[[cue]] <- test_number
+                   self$history <- rbind(self$history,
+                                         data.frame(cue=cue, type = "test"))
                    invisible(self)
 
                  },
@@ -157,6 +165,9 @@ PCR <- R6Class("PCR",
                    }
 
                    private$tests_taken[[cue]] <- test_number
+                   self$history <- rbind(self$history,
+                                         data.frame(cue=cue, type = "test"))
+
                  },
 
                  update_parameters = function(parameter_list) {
@@ -340,6 +351,8 @@ PCRt <- R6Class("PCRt",
                     }
 
                     private$tests_taken[[cue]] <- test_number
+                    self$history <- rbind(self$history,
+                                          data.frame(cue=cue, type = "test"))
                   }
                 ),
 
