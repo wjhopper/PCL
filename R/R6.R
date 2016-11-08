@@ -64,8 +64,8 @@ PCR <- R6Class("PCR",
                    # Calls PR_learning method with probability parameter ER
                    # and adds the result to the current activations
                    # for each item associated with the given cue
-                   self$PR_strengths[[cue]] <-  self$PR_strengths[[cue]] +
-                     private$PR_learning(cue = cue, p = value(self$ER))
+                   self$PR_strengths[[cue]] <- private$study_general(cue = cue,
+                                                                     probability = self$ER@value)
                    invisible(self)
 
                  },
@@ -75,8 +75,8 @@ PCR <- R6Class("PCR",
                    # Calls PR_learning method with probability parameter LR
                    # and adds the result to the current activations
                    # for each item associated with the given cue
-                   self$PR_strengths[[cue]] <- self$PR_strengths[[cue]] +
-                     private$PR_learning(cue = cue, p = value(self$LR))
+                   self$PR_strengths[[cue]] <- private$study_general(cue = cue,
+                                                                     probability = self$LR@value)
                    invisible(self)
 
                  },
@@ -243,6 +243,10 @@ PCR <- R6Class("PCR",
 
                    correct_index <- which(self$recalled[[cue]][,,test_number])
                    return(correct_index)
+                 },
+
+                 study_general = function(cue, probability) {
+                   self$PR_strengths[[cue]] + private$PR_learning(cue = cue, p = probability)
                  }
                 )
 )
