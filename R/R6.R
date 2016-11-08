@@ -47,7 +47,9 @@ PCR <- R6Class("PCR",
                    self$recalled <- lapply(tests_per_cue,
                                            function(tests) {
                                              if (tests > 0) {
-                                               element <- array(dim = c(nSim, nItems, tests))
+                                               element <- array(dim = c(nSim, nItems, tests),
+                                                                dimnames = list(NULL, NULL,
+                                                                                paste0("Test", 1:tests)))
                                              } else {
                                                element <- NULL
                                              }
