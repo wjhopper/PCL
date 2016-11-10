@@ -296,8 +296,9 @@ PCRt <- R6Class("PCRt",
                     test_number <- private$tests_taken[[cue]] + 1
                     private$calculate_RT(cue, test_number)
                     super$cuedRecall(cue, increment)
-                    r <- self$recalled[[cue]][,,test_number]
-                    self$RT[[cue]][,,test_number][r] <- NA
+                    unrecalled <- !self$recalled[[cue]][,,test_number]
+                    self$RT[[cue]][,,test_number][unrecalled] <- NA
+                    invisible(self)
                   },
 
                   freeRecall = function(cue, increment = TRUE) {
@@ -355,6 +356,7 @@ PCRt <- R6Class("PCRt",
                     private$tests_taken[[cue]] <- test_number
                     self$history <- rbind(self$history,
                                           data.frame(cue=cue, type = "test"))
+                    invisible(self)
                   }
                 ),
 
