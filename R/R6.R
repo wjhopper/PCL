@@ -48,8 +48,11 @@ PCR <- R6Class("PCR",
                                            function(tests) {
                                              if (tests > 0) {
                                                element <- array(dim = c(nSim, nItems, tests),
-                                                                dimnames = list(NULL, NULL,
-                                                                                paste0("Test", 1:tests)))
+                                                                dimnames = list(
+                                                                  list = 1:nSim,
+                                                                  item = 1:nItems,
+                                                                  test = 1:tests)
+                                                                )
                                              } else {
                                                element <- NULL
                                              }
@@ -465,4 +468,54 @@ N_Recalled.PCR <- function(object) {
            proportion = N_Recalled/object$nItems)
   x
 
+}
+
+
+#' Extract observed reaction times
+#'
+#' @param object An R object
+#' @param ... Arguments passed to other methods
+#'
+#' @export
+reaction_times <- function(object, ...) {
+  UseMethod("reaction_times")
+}
+
+#' @importFrom purrr map2_df
+#' @importFrom dplyr mutate
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr left_join
+#' @importFrom dplyr arrange
+#' @importFrom magrittr %>%
+#' @importFrom readr parse_number
+reaction_times.PCRt <- function(object) {
+
+  results <- map2_df(.x = object$recall_order,
+                     .y = object$RT,
+                     .f = function(recall_order, RT) {
+                       recall_order <- reshape_arrays(recall_order,
+                                                      value_name = "order")
+                       RT <- reshape_arrays(RT, value_name = "RT")
+                       left_join(recall_order, RT, by = c("list","test","item"))
+                     },
+                     .id="cue") %>%
+    arrange(cue, list)
+  results
+
+}
+
+
+#' @importFrom tidyr gather_
+#' @importFrom tibble as_tibble
+#' @importFrom tibble rownames_to_column
+#' @importFrom dplyr mutate_if
+#' @importFrom dplyr filter
+reshape_arrays <- function(ARRAY, value_name, na.rm=TRUE) {
+
+  ARRAY <- as.data.frame.table(ARRAY,
+                      stringsAsFactors = FALSE,
+                      responseName = value_name) %>%
+    filter(!is.na('['(., value_name))) %>%
+    mutate_if(is.character, as.integer)
+  ARRAY
 }
