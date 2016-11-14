@@ -453,19 +453,19 @@ N_Recalled <- function(object, ...) {
 #' @importFrom tibble as_tibble
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr mutate
-#' @importFrom readr parse_number
-#' @importFrom magrittr %>%
 N_Recalled.PCR <- function(object) {
 
-  x <- lapply(X = object$recalled, FUN = apply, 3, rowSums) %>%
-    lapply(FUN = function(x) {
-      gather_(as_tibble(x), key_col="test", value_col="N_Recalled",
-            gather_cols = colnames(x)
-            )
-    }) %>%
-    bind_rows(.id="cue") %>%
-    mutate(test = parse_number(test),
-           proportion = N_Recalled/object$nItems)
+  x <- lapply(X = object$recalled, FUN = apply, 3, rowSums)
+  x <- lapply(x, FUN = function(y) {
+        gather_(as_tibble(y),
+                key_col="test",
+                value_col="N_Recalled",
+                gather_cols = colnames(y)
+                )
+    })
+  x <- bind_rows(x, .id="cue")
+  x <- mutate(x, test = as.numeric(test),
+              proportion = N_Recalled/object$nItems)
   x
 
 }
